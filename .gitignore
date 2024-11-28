@@ -1,3 +1,7 @@
 Cargo.lock
 meta/Cargo.lock
-wasm/*
+meta/target
+wasm
+target
+output
+

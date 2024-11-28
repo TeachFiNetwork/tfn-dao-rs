@@ -2,15 +2,19 @@
 
 multiversx_sc::imports!();
 
-#[multiversx_sc::contract]
-pub trait TFNDAOContract {
-    // setup
+pub mod common;
 
+#[multiversx_sc::contract]
+pub trait TFNDAOContract<ContractReader>:
+    common::config::ConfigModule
+{
     #[init]
     fn init(&self) {
+        self.set_state_inactive();
     }
 
     #[upgrade]
     fn upgrade(&self) {
+        self.set_state_inactive();
     }
 }
