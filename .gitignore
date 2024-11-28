@@ -1,7 +1,6 @@
 Cargo.lock
 meta/Cargo.lock
-meta/target
-wasm
-target
-output
-
+meta/target/
+target/
+output/
+wasm/
