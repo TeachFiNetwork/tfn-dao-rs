@@ -69,6 +69,7 @@ pub trait ConfigModule {
         require!(!self.launchpad_sc().is_empty(), ERROR_LAUNCHPAD_SC_NOT_SET);
         require!(self.quorum().get() > 0, ERROR_QUORUM_NOT_SET);
         require!(self.voting_period().get() > 0, ERROR_VOTING_PERIOD_NOT_SET);
+        require!(self.min_proposal_amount().get() > 0, ERROR_PROPOSAL_AMOUNT_NOT_SET);
 
         self.state().set(State::Active);
     }

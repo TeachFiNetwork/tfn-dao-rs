@@ -23,6 +23,8 @@ pub trait TFNDAOContract<ContractReader>:
     #[payable("*")]
     #[endpoint]
     fn propose(&self, args: ProposalCreationArgs<Self::Api>) -> u64 {
+        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
+
         let payment = self.call_value().single_esdt();
         require!(payment.token_identifier == self.governance_token().get(), ERROR_INVALID_PAYMENT);
         require!(payment.amount >= self.min_proposal_amount().get(), ERROR_NOT_ENOUGH_FUNDS_TO_PROPOSE);
@@ -61,6 +63,7 @@ pub trait TFNDAOContract<ContractReader>:
     }
 
     fn vote(&self, proposal_id: u64, vote_type: VoteType) {
+        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
         require!(!self.proposals(proposal_id).is_empty(), ERROR_PROPOSAL_NOT_FOUND);
 
         let mut proposal = self.proposals(proposal_id).get();
@@ -69,6 +72,7 @@ pub trait TFNDAOContract<ContractReader>:
 
         let payment = self.call_value().single_esdt();
         require!(payment.token_identifier == self.governance_token().get(), ERROR_INVALID_PAYMENT);
+        require!(payment.amount > 0, ERROR_ZERO_PAYMENT);
 
         match vote_type {
             VoteType::Upvote => proposal.num_upvotes += &payment.amount,
@@ -105,6 +109,7 @@ pub trait TFNDAOContract<ContractReader>:
 
     #[endpoint]
     fn execute(&self, proposal_id: u64) {
+        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
         require!(!self.proposals(proposal_id).is_empty(), ERROR_PROPOSAL_NOT_FOUND);
 
         let mut proposal = self.proposals(proposal_id).get();
