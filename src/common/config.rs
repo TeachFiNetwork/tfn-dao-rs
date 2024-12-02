@@ -108,24 +108,42 @@ pub trait ConfigModule {
     fn launchpad_sc(&self) -> SingleValueMapper<ManagedAddress>;
 
     // min proposal amount
+    #[only_owner]
+    #[endpoint(setMinProposalAmount)]
+    fn set_min_proposal_amount(&self, amount: &BigUint) {
+        self.min_proposal_amount().set(amount);
+    }
+
     #[view(getMinProposalAmount)]
     #[storage_mapper("min_proposal_amount")]
     fn min_proposal_amount(&self) -> SingleValueMapper<BigUint>;
 
-    // last proposal id
-    #[view(getLastProposalId)]
-    #[storage_mapper("last_proposal_id")]
-    fn last_proposal_id(&self) -> SingleValueMapper<u64>;
-
     // voting period (blocks)
+    #[only_owner]
+    #[endpoint(setVotingPeriod)]
+    fn set_voting_period(&self, period: u64) {
+        self.voting_period().set(period);
+    }
+
     #[view(getVotingPeriod)]
     #[storage_mapper("voting_period")]
     fn voting_period(&self) -> SingleValueMapper<u64>;
 
     // quorum
+    #[only_owner]
+    #[endpoint(setQuorum)]
+    fn set_quorum(&self, quorum: &BigUint) {
+        self.quorum().set(quorum);
+    }
+
     #[view(getQuorum)]
     #[storage_mapper("quorum")]
     fn quorum(&self) -> SingleValueMapper<BigUint>;
+
+    // last proposal id
+    #[view(getLastProposalId)]
+    #[storage_mapper("last_proposal_id")]
+    fn last_proposal_id(&self) -> SingleValueMapper<u64>;
 
     // proposal
     #[view(getProposal)]
