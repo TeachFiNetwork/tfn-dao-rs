@@ -66,7 +66,6 @@ pub trait ConfigModule {
     #[endpoint(setStateActive)]
     fn set_state_active(&self) {
         require!(!self.governance_token().is_empty(), ERROR_TOKEN_NOT_SET);
-        require!(!self.launchpad_sc().is_empty(), ERROR_LAUNCHPAD_SC_NOT_SET);
         require!(self.quorum().get() > 0, ERROR_QUORUM_NOT_SET);
         require!(self.voting_period().get() > 0, ERROR_VOTING_PERIOD_NOT_SET);
         require!(self.min_proposal_amount().get() > 0, ERROR_PROPOSAL_AMOUNT_NOT_SET);
@@ -96,17 +95,6 @@ pub trait ConfigModule {
     #[view(getGovernanceToken)]
     #[storage_mapper("governance_token")]
     fn governance_token(&self) -> SingleValueMapper<TokenIdentifier>;
-
-    // launchpad sc
-    #[only_owner]
-    #[endpoint(setLaunchpadSC)]
-    fn set_launchpad_sc(&self, address: ManagedAddress) {
-        self.launchpad_sc().set(address);
-    }
-
-    #[view(getLaunchpadSC)]
-    #[storage_mapper("launchpad_sc")]
-    fn launchpad_sc(&self) -> SingleValueMapper<ManagedAddress>;
 
     // min proposal amount
     #[only_owner]

@@ -21,6 +21,10 @@ pub trait TFNDAOContract<ContractReader>:
     }
 
     #[payable("*")]
+    #[endpoint(addFunds)]
+    fn add_funds(&self) {}
+
+    #[payable("*")]
     #[endpoint]
     fn propose(&self, args: ProposalCreationArgs<Self::Api>) -> u64 {
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
