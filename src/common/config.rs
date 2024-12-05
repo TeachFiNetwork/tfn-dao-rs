@@ -130,7 +130,15 @@ pub trait ConfigModule {
     #[storage_mapper("quorum")]
     fn quorum(&self) -> SingleValueMapper<BigUint>;
 
-    // launchpad sc
+    // launchpad sc address
+    #[only_owner]
+    #[endpoint(setLaunchpadAddress)]
+    fn set_launchpad_address(&self, address: ManagedAddress) {
+        require!(self.launchpad_sc().is_empty(), ERROR_LAUNCHPAD_ALREADY_SET);
+
+        self.launchpad_sc().set(address);
+    }
+
     #[view(getLaunchpadAddress)]
     #[storage_mapper("launchpad_sc")]
     fn launchpad_sc(&self) -> SingleValueMapper<ManagedAddress>;

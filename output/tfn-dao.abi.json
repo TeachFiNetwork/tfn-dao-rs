@@ -216,6 +216,18 @@
             ]
         },
         {
+            "name": "setLaunchpadAddress",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "getLaunchpadAddress",
             "mutability": "readonly",
             "inputs": [],
