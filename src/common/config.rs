@@ -69,6 +69,7 @@ pub trait ConfigModule {
         require!(self.quorum().get() > 0, ERROR_QUORUM_NOT_SET);
         require!(self.voting_period().get() > 0, ERROR_VOTING_PERIOD_NOT_SET);
         require!(self.min_proposal_amount().get() > 0, ERROR_PROPOSAL_AMOUNT_NOT_SET);
+        require!(!self.launchpad_sc().is_empty(), ERROR_LAUNCHPAD_NOT_SET);
 
         self.state().set(State::Active);
     }
@@ -128,6 +129,11 @@ pub trait ConfigModule {
     #[view(getQuorum)]
     #[storage_mapper("quorum")]
     fn quorum(&self) -> SingleValueMapper<BigUint>;
+
+    // launchpad sc
+    #[view(getLaunchpadAddress)]
+    #[storage_mapper("launchpad_sc")]
+    fn launchpad_sc(&self) -> SingleValueMapper<ManagedAddress>;
 
     // last proposal id
     #[view(getLastProposalId)]
@@ -191,5 +197,19 @@ pub trait ConfigModule {
         } else {
             ProposalStatus::Defeated
         }
+    }
+
+    // deployed franchises
+    #[view(getFranchises)]
+    #[storage_mapper("franchises")]
+    fn franchises(&self) -> SingleValueMapper<ManagedVec<ManagedAddress>>;
+
+    #[endpoint(franchiseDeployed)]
+    fn franchise_deployed(&self, address: ManagedAddress) {
+        require!(self.blockchain().get_caller() == self.launchpad_sc().get(), ERROR_ONLY_LAUNCHPAD);
+
+        let mut franchises = self.franchises().get();
+        franchises.push(address);
+        self.franchises().set(franchises);
     }
 }
