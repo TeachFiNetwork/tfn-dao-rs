@@ -314,6 +314,44 @@
             ]
         },
         {
+            "name": "getProposalsCount",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "status",
+                    "type": "ProposalStatus"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getProposals",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "idx_from",
+                    "type": "u64"
+                },
+                {
+                    "name": "idx_to",
+                    "type": "u64"
+                },
+                {
+                    "name": "status",
+                    "type": "Option<ProposalStatus>"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<Proposal>"
+                }
+            ]
+        },
+        {
             "name": "getProposalStatus",
             "mutability": "readonly",
             "inputs": [
@@ -396,6 +434,10 @@
                 {
                     "name": "description",
                     "type": "bytes"
+                },
+                {
+                    "name": "status",
+                    "type": "ProposalStatus"
                 },
                 {
                     "name": "was_executed",

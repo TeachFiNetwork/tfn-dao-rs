@@ -38,6 +38,7 @@ pub trait TFNDAOContract<ContractReader>:
             creation_block: self.blockchain().get_block_nonce(),
             proposer: self.blockchain().get_caller(),
             description: args.description,
+            status: ProposalStatus::Pending,
             was_executed: false,
             actions: args.actions,
             num_upvotes: payment.amount.clone(),

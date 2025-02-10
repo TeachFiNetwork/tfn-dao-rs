@@ -35,7 +35,7 @@ pub enum VoteType {
 }
 
 #[type_abi]
-#[derive(TopEncode, TopDecode, PartialEq, Debug)]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Debug, ManagedVecItem)]
 pub enum ProposalStatus {
     Pending, //Starts from 0
     Active,
@@ -45,12 +45,13 @@ pub enum ProposalStatus {
 }
 
 #[type_abi]
-#[derive(TopEncode, TopDecode)]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct Proposal<M: ManagedTypeApi> {
     pub id: u64,
     pub creation_block: u64,
     pub proposer: ManagedAddress<M>,
     pub description: ManagedBuffer<M>,
+    pub status: ProposalStatus,
 
     pub was_executed: bool,
     pub actions: ManagedVec<M, Action<M>>,
@@ -167,6 +168,48 @@ pub trait ConfigModule {
     #[view(getVoterProposals)]
     #[storage_mapper("voter_proposals")]
     fn voter_proposals(&self, voter: &ManagedAddress) -> UnorderedSetMapper<u64>;
+
+    // get number of proposals with the specified status
+    #[view(getProposalsCount)]
+    fn get_proposals_count(&self, status: ProposalStatus) -> u64 {
+        let mut count = 0;
+        for idx in 0..self.last_proposal_id().get() {
+            let proposal = self.proposals(idx).get();
+            let proposal_status = self.get_proposal_status(&proposal);
+            if status == proposal_status {
+                count += 1;
+            }
+        }
+
+        count
+    }
+
+    // view paginated proposals of certain type
+    #[view(getProposals)]
+    fn get_proposals(&self, idx_from: u64, idx_to: u64, status: Option<ProposalStatus>) -> ManagedVec<Proposal<Self::Api>> {
+        let mut proposals: ManagedVec<Proposal<Self::Api>> = ManagedVec::new();
+        let all = status.is_none();
+        let filter_status = match status {
+            Option::Some(value) => value,
+            Option::None => ProposalStatus::Pending
+        };
+        let mut real_idx: u64 = 0;
+        for idx in 0..self.last_proposal_id().get() {
+            let mut proposal = self.proposals(idx).get();
+            let proposal_status = self.get_proposal_status(&proposal);
+            if !all && proposal_status != filter_status {
+                continue
+            }
+
+            if real_idx >= idx_from && real_idx <= idx_to {
+                proposal.status = proposal_status;
+                proposals.push(proposal);
+            }
+            real_idx += 1;
+        }
+
+        proposals
+    }
 
     // proposal status
     #[view(getProposalStatus)]
