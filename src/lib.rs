@@ -133,11 +133,23 @@ pub trait TFNDAOContract<ContractReader>:
     }
 
     fn execute_action(&self, action: &Action<Self::Api>) -> Result<(), &'static [u8]> {
-        self.send()
-            .contract_call::<()>(action.dest_address.clone(), action.endpoint_name.clone())
-            .with_raw_arguments(ManagedArgBuffer::from(action.arguments.clone()))
-            .with_gas_limit(action.gas_limit)
-            .transfer_execute();
+        let payment =
+            EgldOrEsdtTokenPayment::new(action.payment_token.clone(), 0, action.payment_amount.clone());
+        if action.payment_amount > 0 {
+            self.send()
+                .contract_call::<()>(action.dest_address.clone(), action.endpoint_name.clone())
+                .with_egld_or_single_esdt_transfer(payment)
+                .with_raw_arguments(ManagedArgBuffer::from(action.arguments.clone()))
+                .with_gas_limit(action.gas_limit)
+                .transfer_execute();
+        } else {
+            self.send()
+                .contract_call::<()>(action.dest_address.clone(), action.endpoint_name.clone())
+                .with_raw_arguments(ManagedArgBuffer::from(action.arguments.clone()))
+                .with_gas_limit(action.gas_limit)
+                .transfer_execute();
+        }
+
         Result::Ok(())
     }
 }

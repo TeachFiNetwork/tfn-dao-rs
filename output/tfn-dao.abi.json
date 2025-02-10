@@ -403,8 +403,12 @@
                     "type": "Address"
                 },
                 {
-                    "name": "payments",
-                    "type": "List<bytes>"
+                    "name": "payment_token",
+                    "type": "EgldOrEsdtTokenIdentifier"
+                },
+                {
+                    "name": "payment_amount",
+                    "type": "BigUint"
                 },
                 {
                     "name": "endpoint_name",

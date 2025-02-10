@@ -15,7 +15,8 @@ pub enum State {
 pub struct Action<M: ManagedTypeApi> {
     pub gas_limit: u64,
     pub dest_address: ManagedAddress<M>,
-    pub payments: ManagedVec<M, ManagedBuffer<M>>,
+    pub payment_token: EgldOrEsdtTokenIdentifier<M>,
+    pub payment_amount: BigUint<M>,
     pub endpoint_name: ManagedBuffer<M>,
     pub arguments: ManagedVec<M, ManagedBuffer<M>>,
 }
