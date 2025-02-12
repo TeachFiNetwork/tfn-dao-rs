@@ -40,7 +40,7 @@ pub trait TFNDAOContract<ContractReader>:
             description: args.description,
             status: ProposalStatus::Pending,
             was_executed: false,
-            actions: args.actions,
+            action: args.action,
             num_upvotes: payment.amount.clone(),
             num_downvotes: BigUint::zero(),
         };
@@ -127,9 +127,7 @@ pub trait TFNDAOContract<ContractReader>:
     }
 
     fn execute_proposal(&self, proposal: &Proposal<Self::Api>) {
-        for action in proposal.actions.iter() {
-            self.execute_action(&action).unwrap()
-        }
+        self.execute_action(&proposal.action).unwrap()
     }
 
     fn execute_action(&self, action: &Action<Self::Api>) -> Result<(), &'static [u8]> {

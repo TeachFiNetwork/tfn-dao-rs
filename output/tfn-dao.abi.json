@@ -448,8 +448,8 @@
                     "type": "bool"
                 },
                 {
-                    "name": "actions",
-                    "type": "List<Action>"
+                    "name": "action",
+                    "type": "Action"
                 },
                 {
                     "name": "num_upvotes",
@@ -469,8 +469,8 @@
                     "type": "bytes"
                 },
                 {
-                    "name": "actions",
-                    "type": "List<Action>"
+                    "name": "action",
+                    "type": "Action"
                 }
             ]
         },

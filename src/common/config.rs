@@ -25,7 +25,7 @@ pub struct Action<M: ManagedTypeApi> {
 #[derive(TopEncode, TopDecode)]
 pub struct ProposalCreationArgs<M: ManagedTypeApi> {
     pub description: ManagedBuffer<M>,
-    pub actions: ManagedVec<M, Action<M>>,
+    pub action: Action<M>,
 }
 
 #[type_abi]
@@ -55,7 +55,7 @@ pub struct Proposal<M: ManagedTypeApi> {
     pub status: ProposalStatus,
 
     pub was_executed: bool,
-    pub actions: ManagedVec<M, Action<M>>,
+    pub action: Action<M>,
 
     pub num_upvotes: BigUint<M>,
     pub num_downvotes: BigUint<M>,
