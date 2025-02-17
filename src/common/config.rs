@@ -187,12 +187,12 @@ pub trait ConfigModule {
 
     // view paginated proposals of certain type
     #[view(getProposals)]
-    fn get_proposals(&self, idx_from: u64, idx_to: u64, status: Option<ProposalStatus>) -> ManagedVec<Proposal<Self::Api>> {
+    fn get_proposals(&self, idx_from: u64, idx_to: u64, status: OptionalValue<ProposalStatus>) -> ManagedVec<Proposal<Self::Api>> {
         let mut proposals: ManagedVec<Proposal<Self::Api>> = ManagedVec::new();
         let all = status.is_none();
         let filter_status = match status {
-            Option::Some(value) => value,
-            Option::None => ProposalStatus::Pending
+            OptionalValue::Some(value) => value,
+            OptionalValue::None => ProposalStatus::Pending
         };
         let mut real_idx: u64 = 0;
         for idx in 0..self.last_proposal_id().get() {

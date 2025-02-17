@@ -342,7 +342,8 @@
                 },
                 {
                     "name": "status",
-                    "type": "Option<ProposalStatus>"
+                    "type": "optional<ProposalStatus>",
+                    "multi_arg": true
                 }
             ],
             "outputs": [
