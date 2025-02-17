@@ -3,6 +3,8 @@ multiversx_sc::derive_imports!();
 
 use crate::common::errors::*;
 
+use super::board_config;
+
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
 pub enum State {
@@ -62,23 +64,28 @@ pub struct Proposal<M: ManagedTypeApi> {
 }
 
 #[multiversx_sc::module]
-pub trait ConfigModule {
+pub trait ConfigModule:
+board_config::BoardConfigModule
+{
     // state
-    #[only_owner]
     #[endpoint(setStateActive)]
     fn set_state_active(&self) {
+        let caller = self.blockchain().get_caller();
+        require!(self.board_members().contains(&caller), ERROR_ONLY_BOARD_MEMBERS);
+
         require!(!self.governance_token().is_empty(), ERROR_TOKEN_NOT_SET);
-        require!(self.quorum().get() > 0, ERROR_QUORUM_NOT_SET);
-        require!(self.voting_period().get() > 0, ERROR_VOTING_PERIOD_NOT_SET);
-        require!(self.min_proposal_amount().get() > 0, ERROR_PROPOSAL_AMOUNT_NOT_SET);
+        require!(!self.quorum().is_empty(), ERROR_QUORUM_NOT_SET);
+        require!(!self.voting_period().is_empty(), ERROR_VOTING_PERIOD_NOT_SET);
         require!(!self.launchpad_sc().is_empty(), ERROR_LAUNCHPAD_NOT_SET);
 
         self.state().set(State::Active);
     }
 
-    #[only_owner]
     #[endpoint(setStateInactive)]
     fn set_state_inactive(&self) {
+        let caller = self.blockchain().get_caller();
+        require!(self.board_members().contains(&caller), ERROR_ONLY_BOARD_MEMBERS);
+
         self.state().set(State::Inactive);
     }
 
@@ -87,28 +94,9 @@ pub trait ConfigModule {
     fn state(&self) -> SingleValueMapper<State>;
 
     // governance token
-    #[only_owner]
-    #[endpoint(setGovernanceToken)]
-    fn set_governance_token(&self, token: TokenIdentifier) {
-        require!(self.governance_token().is_empty(), ERROR_TOKEN_ALREADY_SET);
-
-        self.governance_token().set(token);
-    }
-
     #[view(getGovernanceToken)]
     #[storage_mapper("governance_token")]
     fn governance_token(&self) -> SingleValueMapper<TokenIdentifier>;
-
-    // min proposal amount
-    #[only_owner]
-    #[endpoint(setMinProposalAmount)]
-    fn set_min_proposal_amount(&self, amount: &BigUint) {
-        self.min_proposal_amount().set(amount);
-    }
-
-    #[view(getMinProposalAmount)]
-    #[storage_mapper("min_proposal_amount")]
-    fn min_proposal_amount(&self) -> SingleValueMapper<BigUint>;
 
     // voting period (blocks)
     #[only_owner]
@@ -133,14 +121,6 @@ pub trait ConfigModule {
     fn quorum(&self) -> SingleValueMapper<BigUint>;
 
     // launchpad sc address
-    #[only_owner]
-    #[endpoint(setLaunchpadAddress)]
-    fn set_launchpad_address(&self, address: ManagedAddress) {
-        require!(self.launchpad_sc().is_empty(), ERROR_LAUNCHPAD_ALREADY_SET);
-
-        self.launchpad_sc().set(address);
-    }
-
     #[view(getLaunchpadAddress)]
     #[storage_mapper("launchpad_sc")]
     fn launchpad_sc(&self) -> SingleValueMapper<ManagedAddress>;

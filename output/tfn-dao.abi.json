@@ -18,7 +18,16 @@
     },
     "name": "TFNDAOContract",
     "constructor": {
-        "inputs": [],
+        "inputs": [
+            {
+                "name": "governance_token",
+                "type": "TokenIdentifier"
+            },
+            {
+                "name": "launchpad_address",
+                "type": "Address"
+            }
+        ],
         "outputs": []
     },
     "upgradeConstructor": {
@@ -38,9 +47,6 @@
         {
             "name": "propose",
             "mutability": "mutable",
-            "payableInTokens": [
-                "*"
-            ],
             "inputs": [
                 {
                     "name": "args",
@@ -105,14 +111,12 @@
         },
         {
             "name": "setStateActive",
-            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [],
             "outputs": []
         },
         {
             "name": "setStateInactive",
-            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [],
             "outputs": []
@@ -128,46 +132,12 @@
             ]
         },
         {
-            "name": "setGovernanceToken",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "token",
-                    "type": "TokenIdentifier"
-                }
-            ],
-            "outputs": []
-        },
-        {
             "name": "getGovernanceToken",
             "mutability": "readonly",
             "inputs": [],
             "outputs": [
                 {
                     "type": "TokenIdentifier"
-                }
-            ]
-        },
-        {
-            "name": "setMinProposalAmount",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "amount",
-                    "type": "BigUint"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "getMinProposalAmount",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "BigUint"
                 }
             ]
         },
@@ -214,18 +184,6 @@
                     "type": "BigUint"
                 }
             ]
-        },
-        {
-            "name": "setLaunchpadAddress",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "address",
-                    "type": "Address"
-                }
-            ],
-            "outputs": []
         },
         {
             "name": "getLaunchpadAddress",
@@ -384,6 +342,210 @@
                 {
                     "name": "address",
                     "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getBoardMembers",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<Address>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "isBoardMember",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "getBoardQuorum",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "quorumReached",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "signed",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "Address"
+                },
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "getActionValidSignerCount",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "sign",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "unsign",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "discardAction",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "proposeAddBoardMember",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "board_member_address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "proposeRemoveUser",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "user_address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "proposeChangeBoardQuorum",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_quorum",
+                    "type": "u32"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "proposeChangeQuorum",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_quorum",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "proposeChangeVotingPeriod",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_period",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "performAction",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
                 }
             ],
             "outputs": []

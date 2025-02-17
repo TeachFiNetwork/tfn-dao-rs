@@ -5,33 +5,45 @@ use common::{config::*, errors::*};
 multiversx_sc::imports!();
 
 pub mod common;
+pub mod multisig;
 
 #[multiversx_sc::contract]
 pub trait TFNDAOContract<ContractReader>:
-    common::config::ConfigModule
+common::config::ConfigModule
++ common::board_config::BoardConfigModule
++ multisig::MultisigModule
 {
     #[init]
-    fn init(&self) {
+    fn init(
+        &self,
+        governance_token: TokenIdentifier,
+        launchpad_address: ManagedAddress,
+    ) {
+        self.board_members().insert(self.blockchain().get_caller());
+        self.governance_token().set(governance_token);
+        self.launchpad_sc().set(launchpad_address);
         self.set_state_inactive();
     }
 
     #[upgrade]
     fn upgrade(&self) {
-        self.set_state_inactive();
+        if self.board_members().is_empty() {
+            self.board_members().insert(self.blockchain().get_caller());
+        }
+        // self.set_state_inactive();
     }
 
+    // dummy endpoint for adding funds to the DAO
     #[payable("*")]
     #[endpoint(addFunds)]
     fn add_funds(&self) {}
 
-    #[payable("*")]
     #[endpoint]
     fn propose(&self, args: ProposalCreationArgs<Self::Api>) -> u64 {
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
 
-        let payment = self.call_value().single_esdt();
-        require!(payment.token_identifier == self.governance_token().get(), ERROR_INVALID_PAYMENT);
-        require!(payment.amount >= self.min_proposal_amount().get(), ERROR_NOT_ENOUGH_FUNDS_TO_PROPOSE);
+        let caller = self.blockchain().get_caller();
+        require!(self.board_members().contains(&caller), ERROR_ONLY_BOARD_MEMBERS);
 
         let proposal = Proposal {
             id: self.last_proposal_id().get(),
@@ -41,16 +53,11 @@ pub trait TFNDAOContract<ContractReader>:
             status: ProposalStatus::Pending,
             was_executed: false,
             action: args.action,
-            num_upvotes: payment.amount.clone(),
+            num_upvotes: BigUint::zero(),
             num_downvotes: BigUint::zero(),
         };
         self.proposals(proposal.id).set(&proposal);
         self.last_proposal_id().set(proposal.id + 1);
-
-        let caller = self.blockchain().get_caller();
-        self.proposal_voters(proposal.id).insert(caller.clone());
-        self.voter_proposals(&caller).insert(proposal.id);
-        self.voters_amounts(&caller, proposal.id).update(|value| *value += payment.amount);
 
         proposal.id
     }
@@ -80,8 +87,8 @@ pub trait TFNDAOContract<ContractReader>:
         require!(payment.amount > 0, ERROR_ZERO_PAYMENT);
 
         match vote_type {
-            VoteType::Upvote => proposal.num_upvotes += &payment.amount,
-            VoteType::DownVote => proposal.num_downvotes += &payment.amount,
+            VoteType::Upvote => proposal.num_upvotes += &payment.amount.sqrt(),
+            VoteType::DownVote => proposal.num_downvotes += &payment.amount.sqrt(),
         }
         self.proposals(proposal_id).set(&proposal);
 
