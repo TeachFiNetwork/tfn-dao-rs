@@ -56,7 +56,6 @@ pub fn setup() -> ScenarioWorld {
         ScCallStep::new()
             .from(OWNER_ADDRESS_EXPR),
         |sc| {
-            sc.set_governance_token(managed_token_id!(GOVERNANCE_TOKEN_ID));
             sc.set_state_active();
         }
     );

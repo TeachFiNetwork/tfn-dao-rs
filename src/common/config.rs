@@ -53,7 +53,7 @@ pub struct Proposal<M: ManagedTypeApi> {
     pub id: u64,
     pub creation_block: u64,
     pub proposer: ManagedAddress<M>,
-    pub description: ManagedBuffer<M>,
+    pub title: ManagedBuffer<M>,
     pub status: ProposalStatus,
 
     pub was_executed: bool,

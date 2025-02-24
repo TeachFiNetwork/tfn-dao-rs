@@ -49,7 +49,7 @@ common::config::ConfigModule
             id: self.last_proposal_id().get(),
             creation_block: self.blockchain().get_block_nonce(),
             proposer: self.blockchain().get_caller(),
-            description: args.description,
+            title: args.description,
             status: ProposalStatus::Pending,
             was_executed: false,
             action: args.action,

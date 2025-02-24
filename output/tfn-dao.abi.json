@@ -599,7 +599,7 @@
                     "type": "Address"
                 },
                 {
-                    "name": "description",
+                    "name": "title",
                     "type": "bytes"
                 },
                 {
