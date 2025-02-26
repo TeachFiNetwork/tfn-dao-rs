@@ -51,7 +51,7 @@ pub enum ProposalStatus {
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct Proposal<M: ManagedTypeApi> {
     pub id: u64,
-    pub creation_block: u64,
+    pub creation_timestamp: u64,
     pub proposer: ManagedAddress<M>,
     pub title: ManagedBuffer<M>,
     pub status: ProposalStatus,
@@ -206,17 +206,17 @@ board_config::BoardConfigModule
             return ProposalStatus::Executed;
         }
 
-        let current_block = self.blockchain().get_block_nonce();
-        let proposal_block = proposal.creation_block;
+        let current_timestamp = self.blockchain().get_block_timestamp();
+        let proposal_timestamp = proposal.creation_timestamp;
         let voting_period = self.voting_period().get();
 
-        let voting_start = proposal_block;
+        let voting_start = proposal_timestamp;
         let voting_end = voting_start + voting_period;
 
-        if current_block < voting_start {
+        if current_timestamp < voting_start {
             return ProposalStatus::Pending;
         }
-        if current_block >= voting_start && current_block < voting_end {
+        if current_timestamp >= voting_start && current_timestamp < voting_end {
             return ProposalStatus::Active;
         }
 

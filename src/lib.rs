@@ -47,7 +47,7 @@ common::config::ConfigModule
 
         let proposal = Proposal {
             id: self.last_proposal_id().get(),
-            creation_block: self.blockchain().get_block_nonce(),
+            creation_timestamp: self.blockchain().get_block_timestamp(),
             proposer: self.blockchain().get_caller(),
             title: args.description,
             status: ProposalStatus::Pending,

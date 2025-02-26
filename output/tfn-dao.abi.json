@@ -591,7 +591,7 @@
                     "type": "u64"
                 },
                 {
-                    "name": "creation_block",
+                    "name": "creation_timestamp",
                     "type": "u64"
                 },
                 {
