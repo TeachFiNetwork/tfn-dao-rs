@@ -15,3 +15,4 @@ pub static ERROR_VOTING_PERIOD_NOT_ENDED: &[u8] = b"voting period not ended";
 pub static ERROR_PROPOSAL_NOT_SUCCEEDED: &[u8] = b"proposal not succeeded";
 pub static ERROR_ONLY_LAUNCHPAD: &[u8] = b"only the launchpad SC can call this function";
 pub static ERROR_ONLY_BOARD_MEMBERS: &[u8] = b"only board members";
+pub static ERROR_NOTHING_TO_REDEEM: &[u8] = b"nothing to redeem";

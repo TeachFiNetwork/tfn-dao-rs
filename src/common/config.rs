@@ -98,7 +98,7 @@ board_config::BoardConfigModule
     #[storage_mapper("governance_token")]
     fn governance_token(&self) -> SingleValueMapper<TokenIdentifier>;
 
-    // voting period (blocks)
+    // voting period (seconds)
     #[only_owner]
     #[endpoint(setVotingPeriod)]
     fn set_voting_period(&self, period: u64) {

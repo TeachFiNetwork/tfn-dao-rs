@@ -111,6 +111,8 @@ common::config::ConfigModule
         let amount = self.voters_amounts(&caller, proposal_id).take();
         self.voter_proposals(&caller).swap_remove(&proposal_id);
         self.proposal_voters(proposal_id).swap_remove(&caller);
+        require!(amount > 0, ERROR_NOTHING_TO_REDEEM);
+
         self.send().direct_esdt(
             &caller,
             &self.governance_token().get(),
