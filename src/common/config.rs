@@ -98,6 +98,11 @@ board_config::BoardConfigModule
     #[storage_mapper("governance_token")]
     fn governance_token(&self) -> SingleValueMapper<TokenIdentifier>;
 
+    // voting tokens
+    #[view(getVotingTokens)]
+    #[storage_mapper("voting_tokens")]
+    fn voting_tokens(&self) -> MapMapper<TokenIdentifier, BigUint>;
+
     // voting period (seconds)
     #[only_owner]
     #[endpoint(setVotingPeriod)]
@@ -138,7 +143,7 @@ board_config::BoardConfigModule
     // voters amounts
     #[view(getVoterAmount)]
     #[storage_mapper("voters_amounts")]
-    fn voters_amounts(&self, voter: &ManagedAddress, proposal_id: u64) -> SingleValueMapper<BigUint>;
+    fn voters_amounts(&self, voter: &ManagedAddress, proposal_id: u64) -> SingleValueMapper<ManagedVec<EsdtTokenPayment>>;
 
     // proposal voters
     #[view(getProposalVoters)]
@@ -152,12 +157,21 @@ board_config::BoardConfigModule
 
     // get number of proposals with the specified status
     #[view(getProposalsCount)]
-    fn get_proposals_count(&self, status: ProposalStatus) -> u64 {
+    fn get_proposals_count(&self, status: OptionalValue<ProposalStatus>) -> u64 {
+        let all = status.is_none();
+        let filter_status = match status {
+            OptionalValue::Some(value) => value,
+            OptionalValue::None => ProposalStatus::Pending
+        };
         let mut count = 0;
         for idx in 0..self.last_proposal_id().get() {
+            if self.proposals(idx).is_empty() {
+                continue;
+            }
+
             let proposal = self.proposals(idx).get();
             let proposal_status = self.get_proposal_status(&proposal);
-            if status == proposal_status {
+            if all || proposal_status == filter_status {
                 count += 1;
             }
         }
@@ -176,6 +190,10 @@ board_config::BoardConfigModule
         };
         let mut real_idx: u64 = 0;
         for idx in 0..self.last_proposal_id().get() {
+            if self.proposals(idx).is_empty() {
+                continue;
+            }
+
             let mut proposal = self.proposals(idx).get();
             let proposal_status = self.get_proposal_status(&proposal);
             if !all && proposal_status != filter_status {

@@ -12,6 +12,9 @@ pub enum BoardAction<M: ManagedTypeApi> {
 
     ChangeQuorum(BigUint<M>),
     ChangeVotingPeriod(u64),
+
+    AddVotingToken(TokenIdentifier<M>, BigUint<M>),
+    RemoveVotingToken(TokenIdentifier<M>),
 }
 
 #[multiversx_sc::module]

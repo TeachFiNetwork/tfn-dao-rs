@@ -142,6 +142,17 @@
             ]
         },
         {
+            "name": "getVotingTokens",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<multi<TokenIdentifier,BigUint>>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
             "name": "setVotingPeriod",
             "onlyOwner": true,
             "mutability": "mutable",
@@ -235,7 +246,7 @@
             ],
             "outputs": [
                 {
-                    "type": "BigUint"
+                    "type": "List<EsdtTokenPayment>"
                 }
             ]
         },
@@ -277,7 +288,8 @@
             "inputs": [
                 {
                     "name": "status",
-                    "type": "ProposalStatus"
+                    "type": "optional<ProposalStatus>",
+                    "multi_arg": true
                 }
             ],
             "outputs": [
@@ -580,6 +592,23 @@
                 {
                     "name": "arguments",
                     "type": "List<bytes>"
+                }
+            ]
+        },
+        "EsdtTokenPayment": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "token_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint"
                 }
             ]
         },

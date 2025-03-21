@@ -1,6 +1,6 @@
 #![no_std]
 
-use common::{config::*, errors::*};
+use common::{config::*, consts::*, errors::*};
 
 multiversx_sc::imports!();
 
@@ -20,7 +20,8 @@ common::config::ConfigModule
         launchpad_address: ManagedAddress,
     ) {
         self.board_members().insert(self.blockchain().get_caller());
-        self.governance_token().set(governance_token);
+        self.governance_token().set(&governance_token);
+        self.voting_tokens().insert(governance_token, BigUint::from(ONE));
         self.launchpad_sc().set(launchpad_address);
         self.set_state_inactive();
     }
@@ -29,6 +30,9 @@ common::config::ConfigModule
     fn upgrade(&self) {
         if self.board_members().is_empty() {
             self.board_members().insert(self.blockchain().get_caller());
+        }
+        if self.voting_tokens().is_empty() {
+            self.voting_tokens().insert(self.governance_token().get(), BigUint::from(ONE));
         }
         // self.set_state_inactive();
     }
@@ -83,19 +87,40 @@ common::config::ConfigModule
         require!(pstat == ProposalStatus::Active, ERROR_PROPOSAL_NOT_ACTIVE);
 
         let payment = self.call_value().single_esdt();
-        require!(payment.token_identifier == self.governance_token().get(), ERROR_INVALID_PAYMENT);
+        require!(self.voting_tokens().contains_key(&payment.token_identifier), ERROR_INVALID_PAYMENT);
         require!(payment.amount > 0, ERROR_ZERO_PAYMENT);
 
+        let vote_weight = payment.amount.clone() * self.voting_tokens().get(&payment.token_identifier).unwrap() / ONE;
         match vote_type {
-            VoteType::Upvote => proposal.num_upvotes += &payment.amount.sqrt(),
-            VoteType::DownVote => proposal.num_downvotes += &payment.amount.sqrt(),
+            VoteType::Upvote => proposal.num_upvotes += vote_weight.sqrt(),
+            VoteType::DownVote => proposal.num_downvotes += vote_weight.sqrt(),
         }
         self.proposals(proposal_id).set(&proposal);
 
         let caller = self.blockchain().get_caller();
         self.proposal_voters(proposal.id).insert(caller.clone());
         self.voter_proposals(&caller).insert(proposal.id);
-        self.voters_amounts(&caller, proposal.id).update(|value| *value += payment.amount);
+        
+        // update the amount of tokens voted by the caller
+        let mut new_vec: ManagedVec<EsdtTokenPayment> = ManagedVec::new();
+        let old_vec = self.voters_amounts(&caller, proposal.id).get();
+        let mut found = false;
+        for old_payment in old_vec.iter() {
+            if old_payment.token_identifier == payment.token_identifier {
+                new_vec.push(EsdtTokenPayment::new(
+                    payment.token_identifier.clone(),
+                    0,
+                    &old_payment.amount + &payment.amount,
+                ));
+                found = true;
+            } else {
+                new_vec.push(old_payment.clone());
+            }
+        }
+        if !found {
+            new_vec.push(payment.clone());
+        }
+        self.voters_amounts(&caller, proposal.id).set(&new_vec);
     }
 
     #[endpoint]
@@ -108,17 +133,12 @@ common::config::ConfigModule
         );
 
         let caller = self.blockchain().get_caller();
-        let amount = self.voters_amounts(&caller, proposal_id).take();
+        let payments = self.voters_amounts(&caller, proposal_id).take();
         self.voter_proposals(&caller).swap_remove(&proposal_id);
         self.proposal_voters(proposal_id).swap_remove(&caller);
-        require!(amount > 0, ERROR_NOTHING_TO_REDEEM);
+        require!(!payments.is_empty(), ERROR_NOTHING_TO_REDEEM);
 
-        self.send().direct_esdt(
-            &caller,
-            &self.governance_token().get(),
-            0,
-            &amount,
-        );
+        self.send().direct_multi(&caller, &payments);
     }
 
     #[endpoint]

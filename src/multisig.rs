@@ -113,7 +113,13 @@ crate::common::board_config::BoardConfigModule
             },
             BoardAction::ChangeVotingPeriod(new_voting_period) => {
                 self.voting_period().set(new_voting_period);
-            }
+            },
+            BoardAction::AddVotingToken(token, weight) => {
+                self.voting_tokens().insert(token, weight);
+            },
+            BoardAction::RemoveVotingToken(token) => {
+                self.voting_tokens().remove(&token);
+            },
         };
     }
 }
