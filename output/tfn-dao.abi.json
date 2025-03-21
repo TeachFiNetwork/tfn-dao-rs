@@ -601,6 +601,26 @@
             ]
         },
         {
+            "name": "proposeUpgradeFranchise",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "franchise_address",
+                    "type": "Address"
+                },
+                {
+                    "name": "args",
+                    "type": "optional<List<bytes>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
             "name": "performAction",
             "mutability": "mutable",
             "inputs": [

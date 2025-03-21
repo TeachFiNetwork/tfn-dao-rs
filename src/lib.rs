@@ -6,6 +6,7 @@ multiversx_sc::imports!();
 
 pub mod common;
 pub mod multisig;
+pub mod proxies;
 
 #[multiversx_sc::contract]
 pub trait TFNDAOContract<ContractReader>:
@@ -28,12 +29,6 @@ common::config::ConfigModule
 
     #[upgrade]
     fn upgrade(&self) {
-        if self.board_members().is_empty() {
-            self.board_members().insert(self.blockchain().get_caller());
-        }
-        if self.voting_tokens().is_empty() {
-            self.voting_tokens().insert(self.governance_token().get(), BigUint::from(ONE));
-        }
         // self.set_state_inactive();
     }
 

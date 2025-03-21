@@ -2,6 +2,8 @@ use crate::common::{board_config::*, errors::*};
 
 multiversx_sc::imports!();
 
+use crate::proxies::launchpad_proxy::{self};
+
 #[multiversx_sc::module]
 pub trait MultisigModule:
 crate::common::board_config::BoardConfigModule
@@ -95,6 +97,29 @@ crate::common::board_config::BoardConfigModule
         self.propose_action(BoardAction::RemoveVotingToken(token))
     }
 
+    #[endpoint(proposeUpgradeFranchise)]
+    fn propose_upgrade_franchise(
+        &self,
+        franchise_address: ManagedAddress,
+        args: OptionalValue<ManagedArgBuffer<Self::Api>>,
+    ) -> usize {
+        let franchises = self.franchises().get();
+        let mut found = false;
+        for franchise in franchises.into_iter() {
+            if franchise == franchise_address {
+                found = true;
+                break;
+            }
+        }
+        require!(found, ERROR_FRANCHISE_NOT_DEPLOYED);
+
+        let upgrade_args = match args {
+            OptionalValue::Some(args) => args,
+            OptionalValue::None => ManagedArgBuffer::new(),
+        };
+        self.propose_action(BoardAction::UpgradeFranchise(franchise_address, upgrade_args))
+    }
+
     #[endpoint(performAction)]
     fn perform_action_endpoint(&self, action_id: usize) {
         let caller = self.blockchain().get_caller();
@@ -134,6 +159,21 @@ crate::common::board_config::BoardConfigModule
             BoardAction::RemoveVotingToken(token) => {
                 self.voting_tokens().remove(&token);
             },
+            BoardAction::UpgradeFranchise(franchise_address, args) => {
+                let upgrade_args = if !args.is_empty() {
+                    OptionalValue::Some(args)
+                } else {
+                    OptionalValue::None
+                };
+                self.launchpad_contract_proxy()
+                    .contract(self.launchpad_sc().get())
+                    .upgrade_franchise(franchise_address, upgrade_args)
+                    .sync_call();
+            },
         };
     }
+
+    // proxies
+    #[proxy]
+    fn launchpad_contract_proxy(&self) -> launchpad_proxy::Proxy<Self::Api>;
 }

@@ -15,6 +15,8 @@ pub enum BoardAction<M: ManagedTypeApi> {
 
     AddVotingToken(TokenIdentifier<M>, BigUint<M>),
     RemoveVotingToken(TokenIdentifier<M>),
+
+    UpgradeFranchise(ManagedAddress<M>, ManagedArgBuffer<M>),
 }
 
 #[multiversx_sc::module]
