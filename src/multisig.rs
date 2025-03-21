@@ -81,6 +81,20 @@ crate::common::board_config::BoardConfigModule
         self.propose_action(BoardAction::ChangeVotingPeriod(new_period))
     }
 
+    #[endpoint(proposeAddVotingToken)]
+    fn propose_add_voting_token(
+        &self,
+        token: TokenIdentifier,
+        weight: BigUint,
+    ) -> usize {
+        self.propose_action(BoardAction::AddVotingToken(token, weight))
+    }
+
+    #[endpoint(proposeRemoveVotingToken)]
+    fn propose_remove_voting_token(&self, token: TokenIdentifier) -> usize {
+        self.propose_action(BoardAction::RemoveVotingToken(token))
+    }
+
     #[endpoint(performAction)]
     fn perform_action_endpoint(&self, action_id: usize) {
         let caller = self.blockchain().get_caller();

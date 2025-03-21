@@ -567,6 +567,40 @@
             ]
         },
         {
+            "name": "proposeAddVotingToken",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "weight",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "proposeRemoveVotingToken",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
             "name": "performAction",
             "mutability": "mutable",
             "inputs": [
