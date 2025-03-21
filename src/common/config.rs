@@ -145,6 +145,25 @@ board_config::BoardConfigModule
     #[storage_mapper("voters_amounts")]
     fn voters_amounts(&self, voter: &ManagedAddress, proposal_id: u64) -> SingleValueMapper<ManagedVec<EsdtTokenPayment>>;
 
+    #[view(getRedeemableProposalIDs)]
+    fn get_redeemable_proposals(&self, user: ManagedAddress) -> ManagedVec<u64> {
+        let mut ids: ManagedVec<u64> = ManagedVec::new();
+        for idx in self.voter_proposals(&user).iter() {
+            if self.proposals(idx).is_empty() {
+                continue;
+            }
+
+            let proposal = self.proposals(idx).get();
+            let payments = self.voters_amounts(&user, idx).get();
+            let pstat = self.get_proposal_status(&proposal);
+            if (pstat == ProposalStatus::Succeeded || pstat == ProposalStatus::Defeated || pstat == ProposalStatus::Executed) && !payments.is_empty() {
+                ids.push(idx);
+            }
+        }
+
+        ids
+    }
+
     // proposal voters
     #[view(getProposalVoters)]
     #[storage_mapper("proposal_voters")]

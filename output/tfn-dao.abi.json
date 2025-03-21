@@ -251,6 +251,21 @@
             ]
         },
         {
+            "name": "getRedeemableProposalIDs",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<u64>"
+                }
+            ]
+        },
+        {
             "name": "getProposalVoters",
             "mutability": "readonly",
             "inputs": [
