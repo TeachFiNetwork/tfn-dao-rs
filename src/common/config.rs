@@ -70,9 +70,7 @@ board_config::BoardConfigModule
     // state
     #[endpoint(setStateActive)]
     fn set_state_active(&self) {
-        let caller = self.blockchain().get_caller();
-        require!(self.board_members().contains(&caller), ERROR_ONLY_BOARD_MEMBERS);
-
+        self.only_board_members();
         require!(!self.governance_token().is_empty(), ERROR_TOKEN_NOT_SET);
         require!(!self.quorum().is_empty(), ERROR_QUORUM_NOT_SET);
         require!(!self.voting_period().is_empty(), ERROR_VOTING_PERIOD_NOT_SET);
@@ -83,8 +81,7 @@ board_config::BoardConfigModule
 
     #[endpoint(setStateInactive)]
     fn set_state_inactive(&self) {
-        let caller = self.blockchain().get_caller();
-        require!(self.board_members().contains(&caller), ERROR_ONLY_BOARD_MEMBERS);
+        self.only_board_members();
 
         self.state().set(State::Inactive);
     }
@@ -129,6 +126,12 @@ board_config::BoardConfigModule
     #[view(getLaunchpadAddress)]
     #[storage_mapper("launchpad_sc")]
     fn launchpad_sc(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[only_owner]
+    #[endpoint(setLaunchpadAddress)]
+    fn set_launchpad_address(&self, address: ManagedAddress) {
+        self.launchpad_sc().set(address);
+    }
 
     // last proposal id
     #[view(getLastProposalId)]
@@ -280,5 +283,11 @@ board_config::BoardConfigModule
         let mut franchises = self.franchises().get();
         franchises.push(address);
         self.franchises().set(franchises);
+    }
+
+    // helpers
+    fn only_board_members(&self) {
+        let caller = self.blockchain().get_caller();
+        require!(self.board_members().contains(&caller), ERROR_ONLY_BOARD_MEMBERS);
     }
 }

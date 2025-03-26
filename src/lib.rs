@@ -18,18 +18,14 @@ common::config::ConfigModule
     fn init(
         &self,
         governance_token: TokenIdentifier,
-        launchpad_address: ManagedAddress,
     ) {
         self.board_members().insert(self.blockchain().get_caller());
         self.governance_token().set(&governance_token);
         self.voting_tokens().insert(governance_token, BigUint::from(ONE));
-        self.launchpad_sc().set(launchpad_address);
-        self.set_state_inactive();
     }
 
     #[upgrade]
     fn upgrade(&self) {
-        // self.set_state_inactive();
     }
 
     // dummy endpoint for adding funds to the DAO

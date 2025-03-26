@@ -22,10 +22,6 @@
             {
                 "name": "governance_token",
                 "type": "TokenIdentifier"
-            },
-            {
-                "name": "launchpad_address",
-                "type": "Address"
             }
         ],
         "outputs": []
@@ -205,6 +201,18 @@
                     "type": "Address"
                 }
             ]
+        },
+        {
+            "name": "setLaunchpadAddress",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
         },
         {
             "name": "getLastProposalId",
