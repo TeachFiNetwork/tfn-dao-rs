@@ -97,10 +97,10 @@ common::config::ConfigModule
         let old_vec = self.voters_amounts(&caller, proposal.id).get();
         let mut found = false;
         for old_payment in old_vec.iter() {
-            if old_payment.token_identifier == payment.token_identifier {
+            if old_payment.token_identifier == payment.token_identifier && old_payment.token_nonce == payment.token_nonce {
                 new_vec.push(EsdtTokenPayment::new(
                     payment.token_identifier.clone(),
-                    0,
+                    payment.token_nonce,
                     &old_payment.amount + &payment.amount,
                 ));
                 found = true;
