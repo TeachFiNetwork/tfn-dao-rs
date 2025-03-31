@@ -213,7 +213,6 @@ common::config::ConfigModule
                 }
             },
         };
-        // self.execute_action(&proposal.action).unwrap()
     }
 
     fn execute_action(&self, action: &Action<Self::Api>) -> Result<(), &'static [u8]> {

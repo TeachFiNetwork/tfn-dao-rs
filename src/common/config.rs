@@ -2,7 +2,6 @@ multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
 use crate::common::errors::*;
-
 use super::board_config;
 
 #[type_abi]
@@ -118,7 +117,6 @@ board_config::BoardConfigModule
     #[endpoint(setStateActive)]
     fn set_state_active(&self) {
         self.only_board_members();
-        require!(!self.governance_token().is_empty(), ERROR_TOKEN_NOT_SET);
         require!(!self.quorum().is_empty(), ERROR_QUORUM_NOT_SET);
         require!(!self.voting_period().is_empty(), ERROR_VOTING_PERIOD_NOT_SET);
         require!(!self.launchpad_sc().is_empty(), ERROR_LAUNCHPAD_NOT_SET);
