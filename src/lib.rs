@@ -70,16 +70,13 @@ common::config::ConfigModule
         &self,
         title: ManagedBuffer,
         description: ManagedBuffer,
-        actions: ManagedVec<Action<Self::Api>>,
+        transfer_proposal: TransferProposal<Self::Api>,
     ) -> u64 {
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
 
         let caller = self.blockchain().get_caller();
         require!(self.board_members().contains(&caller), ERROR_ONLY_BOARD_MEMBERS);
 
-        let transfer_proposal = TransferProposal {
-            actions,
-        };
         let proposal = Proposal {
             id: self.last_proposal_id().get(),
             proposal_data: ProposalType::NewTransfer(transfer_proposal),

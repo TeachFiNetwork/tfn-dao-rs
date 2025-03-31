@@ -76,8 +76,8 @@
                     "type": "bytes"
                 },
                 {
-                    "name": "actions",
-                    "type": "List<Action>"
+                    "name": "transfer_proposal",
+                    "type": "TransferProposal"
                 }
             ],
             "outputs": [
