@@ -32,10 +32,12 @@ pub trait BoardConfigModule {
     }
 
     // actions
+    #[view(getActions)]
     #[storage_mapper("action_data")]
     fn action_mapper(&self) -> VecMapper<BoardAction<Self::Api>>;
 
     // signers
+    #[view(getActionSignerIds)]
     #[storage_mapper("action_signer_ids")]
     fn action_signers(&self, action_id: usize) -> UnorderedSetMapper<ManagedAddress>;
 

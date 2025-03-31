@@ -17,3 +17,4 @@ pub static ERROR_ONLY_LAUNCHPAD: &[u8] = b"only the launchpad SC can call this f
 pub static ERROR_ONLY_BOARD_MEMBERS: &[u8] = b"only board members";
 pub static ERROR_NOTHING_TO_REDEEM: &[u8] = b"nothing to redeem";
 pub static ERROR_FRANCHISE_NOT_DEPLOYED: &[u8] = b"franchise not deployed";
+pub static ERROR_NO_VOTING_TOKENS: &[u8] = b"no voting tokens set";

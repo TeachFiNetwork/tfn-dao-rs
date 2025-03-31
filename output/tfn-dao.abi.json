@@ -449,6 +449,33 @@
             ]
         },
         {
+            "name": "getActions",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<BoardAction>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getActionSignerIds",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<Address>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
             "name": "getBoardQuorum",
             "mutability": "readonly",
             "inputs": [],
@@ -710,6 +737,103 @@
                 {
                     "name": "arguments",
                     "type": "List<bytes>"
+                }
+            ]
+        },
+        "BoardAction": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "Nothing",
+                    "discriminant": 0
+                },
+                {
+                    "name": "AddBoardMember",
+                    "discriminant": 1,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "Address"
+                        }
+                    ]
+                },
+                {
+                    "name": "RemoveBoardMember",
+                    "discriminant": 2,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "Address"
+                        }
+                    ]
+                },
+                {
+                    "name": "ChangeBoardQuorum",
+                    "discriminant": 3,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "u32"
+                        }
+                    ]
+                },
+                {
+                    "name": "ChangeQuorum",
+                    "discriminant": 4,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "BigUint"
+                        }
+                    ]
+                },
+                {
+                    "name": "ChangeVotingPeriod",
+                    "discriminant": 5,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "u64"
+                        }
+                    ]
+                },
+                {
+                    "name": "AddVotingToken",
+                    "discriminant": 6,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "TokenIdentifier"
+                        },
+                        {
+                            "name": "1",
+                            "type": "BigUint"
+                        }
+                    ]
+                },
+                {
+                    "name": "RemoveVotingToken",
+                    "discriminant": 7,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "TokenIdentifier"
+                        }
+                    ]
+                },
+                {
+                    "name": "UpgradeFranchise",
+                    "discriminant": 8,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "Address"
+                        },
+                        {
+                            "name": "1",
+                            "type": "List<bytes>"
+                        }
+                    ]
                 }
             ]
         },

@@ -158,6 +158,9 @@ crate::common::board_config::BoardConfigModule
             },
             BoardAction::RemoveVotingToken(token) => {
                 self.voting_tokens().remove(&token);
+                if self.voting_tokens().is_empty() {
+                    self.set_state_inactive();
+                }
             },
             BoardAction::UpgradeFranchise(franchise_address, args) => {
                 let upgrade_args = if !args.is_empty() {

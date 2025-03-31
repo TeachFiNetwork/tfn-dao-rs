@@ -122,6 +122,7 @@ board_config::BoardConfigModule
         require!(!self.quorum().is_empty(), ERROR_QUORUM_NOT_SET);
         require!(!self.voting_period().is_empty(), ERROR_VOTING_PERIOD_NOT_SET);
         require!(!self.launchpad_sc().is_empty(), ERROR_LAUNCHPAD_NOT_SET);
+        require!(!self.voting_tokens().is_empty(), ERROR_NO_VOTING_TOKENS);
 
         self.state().set(State::Active);
     }
