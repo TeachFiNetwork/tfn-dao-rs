@@ -41,12 +41,43 @@
             "outputs": []
         },
         {
-            "name": "propose",
+            "name": "proposeNewLaunchpad",
             "mutability": "mutable",
             "inputs": [
                 {
-                    "name": "args",
-                    "type": "ProposalCreationArgs"
+                    "name": "title",
+                    "type": "bytes"
+                },
+                {
+                    "name": "description",
+                    "type": "bytes"
+                },
+                {
+                    "name": "launchpad_proposal",
+                    "type": "LaunchpadProposal"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "proposeNewTransfer",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "title",
+                    "type": "bytes"
+                },
+                {
+                    "name": "description",
+                    "type": "bytes"
+                },
+                {
+                    "name": "actions",
+                    "type": "List<Action>"
                 }
             ],
             "outputs": [
@@ -306,12 +337,12 @@
             ]
         },
         {
-            "name": "getProposalsCount",
+            "name": "getProposalsCountByType",
             "mutability": "readonly",
             "inputs": [
                 {
                     "name": "status",
-                    "type": "optional<ProposalStatus>",
+                    "type": "optional<ProposalTypeEnum>",
                     "multi_arg": true
                 }
             ],
@@ -334,14 +365,14 @@
                     "type": "u64"
                 },
                 {
-                    "name": "status",
-                    "type": "optional<ProposalStatus>",
-                    "multi_arg": true
+                    "name": "proposal_type",
+                    "type": "ProposalTypeEnum"
                 }
             ],
             "outputs": [
                 {
-                    "type": "List<Proposal>"
+                    "type": "variadic<Proposal>",
+                    "multi_result": true
                 }
             ]
         },
@@ -689,12 +720,57 @@
                 }
             ]
         },
+        "LaunchpadProposal": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "kyc_enforced",
+                    "type": "bool"
+                },
+                {
+                    "name": "token",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "payment_token",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "price",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "min_buy_amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "max_buy_amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "start_time",
+                    "type": "u64"
+                },
+                {
+                    "name": "end_time",
+                    "type": "u64"
+                }
+            ]
+        },
         "Proposal": {
             "type": "struct",
             "fields": [
                 {
                     "name": "id",
                     "type": "u64"
+                },
+                {
+                    "name": "proposal_data",
+                    "type": "ProposalType"
+                },
+                {
+                    "name": "proposal_type",
+                    "type": "ProposalTypeEnum"
                 },
                 {
                     "name": "creation_timestamp",
@@ -709,6 +785,10 @@
                     "type": "bytes"
                 },
                 {
+                    "name": "description",
+                    "type": "bytes"
+                },
+                {
                     "name": "status",
                     "type": "ProposalStatus"
                 },
@@ -717,29 +797,12 @@
                     "type": "bool"
                 },
                 {
-                    "name": "action",
-                    "type": "Action"
-                },
-                {
                     "name": "num_upvotes",
                     "type": "BigUint"
                 },
                 {
                     "name": "num_downvotes",
                     "type": "BigUint"
-                }
-            ]
-        },
-        "ProposalCreationArgs": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "description",
-                    "type": "bytes"
-                },
-                {
-                    "name": "action",
-                    "type": "Action"
                 }
             ]
         },
@@ -768,6 +831,52 @@
                 }
             ]
         },
+        "ProposalType": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "Nothing",
+                    "discriminant": 0
+                },
+                {
+                    "name": "NewLaunchpad",
+                    "discriminant": 1,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "LaunchpadProposal"
+                        }
+                    ]
+                },
+                {
+                    "name": "NewTransfer",
+                    "discriminant": 2,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "TransferProposal"
+                        }
+                    ]
+                }
+            ]
+        },
+        "ProposalTypeEnum": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "Nothing",
+                    "discriminant": 0
+                },
+                {
+                    "name": "NewLaunchpad",
+                    "discriminant": 1
+                },
+                {
+                    "name": "NewTransfer",
+                    "discriminant": 2
+                }
+            ]
+        },
         "State": {
             "type": "enum",
             "variants": [
@@ -778,6 +887,15 @@
                 {
                     "name": "Active",
                     "discriminant": 1
+                }
+            ]
+        },
+        "TransferProposal": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "actions",
+                    "type": "List<Action>"
                 }
             ]
         }

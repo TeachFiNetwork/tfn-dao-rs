@@ -1,6 +1,7 @@
 #![no_std]
 
 use common::{config::*, consts::*, errors::*};
+use crate::proxies::launchpad_proxy::ProxyTrait as _;
 
 multiversx_sc::imports!();
 
@@ -33,8 +34,13 @@ common::config::ConfigModule
     #[endpoint(addFunds)]
     fn add_funds(&self) {}
 
-    #[endpoint]
-    fn propose(&self, args: ProposalCreationArgs<Self::Api>) -> u64 {
+    #[endpoint(proposeNewLaunchpad)]
+    fn propose_new_launchpad(
+        &self,
+        title: ManagedBuffer,
+        description: ManagedBuffer,
+        launchpad_proposal: LaunchpadProposal<Self::Api>,
+    ) -> u64 {
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
 
         let caller = self.blockchain().get_caller();
@@ -42,12 +48,48 @@ common::config::ConfigModule
 
         let proposal = Proposal {
             id: self.last_proposal_id().get(),
+            proposal_data: ProposalType::NewLaunchpad(launchpad_proposal),
+            proposal_type: ProposalTypeEnum::NewLaunchpad,
             creation_timestamp: self.blockchain().get_block_timestamp(),
-            proposer: self.blockchain().get_caller(),
-            title: args.description,
+            proposer: caller,
+            title,
+            description,
             status: ProposalStatus::Pending,
             was_executed: false,
-            action: args.action,
+            num_upvotes: BigUint::zero(),
+            num_downvotes: BigUint::zero(),
+        };
+        self.proposals(proposal.id).set(&proposal);
+        self.last_proposal_id().set(proposal.id + 1);
+
+        proposal.id
+    }
+
+    #[endpoint(proposeNewTransfer)]
+    fn propose_new_transfer(
+        &self,
+        title: ManagedBuffer,
+        description: ManagedBuffer,
+        actions: ManagedVec<Action<Self::Api>>,
+    ) -> u64 {
+        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
+
+        let caller = self.blockchain().get_caller();
+        require!(self.board_members().contains(&caller), ERROR_ONLY_BOARD_MEMBERS);
+
+        let transfer_proposal = TransferProposal {
+            actions,
+        };
+        let proposal = Proposal {
+            id: self.last_proposal_id().get(),
+            proposal_data: ProposalType::NewTransfer(transfer_proposal),
+            proposal_type: ProposalTypeEnum::NewTransfer,
+            creation_timestamp: self.blockchain().get_block_timestamp(),
+            proposer: caller,
+            title,
+            description,
+            status: ProposalStatus::Pending,
+            was_executed: false,
             num_upvotes: BigUint::zero(),
             num_downvotes: BigUint::zero(),
         };
@@ -58,13 +100,13 @@ common::config::ConfigModule
     }
 
     #[payable("*")]
-    #[endpoint]
+    #[endpoint(upvote)]
     fn upvote(&self, proposal_id: u64) {
         self.vote(proposal_id, VoteType::Upvote)
     }
 
     #[payable("*")]
-    #[endpoint]
+    #[endpoint(downvote)]
     fn downvote(&self, proposal_id: u64) {
         self.vote(proposal_id, VoteType::DownVote)
     }
@@ -114,7 +156,7 @@ common::config::ConfigModule
         self.voters_amounts(&caller, proposal.id).set(&new_vec);
     }
 
-    #[endpoint]
+    #[endpoint(redeem)]
     fn redeem(&self, proposal_id: u64) {
         let proposal = self.proposals(proposal_id).get();
         let pstat = self.get_proposal_status(&proposal);
@@ -132,7 +174,7 @@ common::config::ConfigModule
         self.send().direct_multi(&caller, &payments);
     }
 
-    #[endpoint]
+    #[endpoint(execute)]
     fn execute(&self, proposal_id: u64) {
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
         require!(!self.proposals(proposal_id).is_empty(), ERROR_PROPOSAL_NOT_FOUND);
@@ -147,7 +189,34 @@ common::config::ConfigModule
     }
 
     fn execute_proposal(&self, proposal: &Proposal<Self::Api>) {
-        self.execute_action(&proposal.action).unwrap()
+        match proposal.proposal_data.clone() {
+            ProposalType::Nothing => return,
+
+            ProposalType::NewLaunchpad(launchpad_proposal) => {
+                self.launchpad_contract_proxy()
+                    .contract(self.launchpad_sc().get())
+                    .new_launchpad(
+                        proposal.proposer.clone(),
+                        launchpad_proposal.kyc_enforced,
+                        proposal.description.clone(),
+                        launchpad_proposal.token,
+                        launchpad_proposal.payment_token,
+                        launchpad_proposal.price,
+                        launchpad_proposal.min_buy_amount,
+                        launchpad_proposal.max_buy_amount,
+                        launchpad_proposal.start_time,
+                        launchpad_proposal.end_time,
+                    )
+                    .sync_call();
+            },
+
+            ProposalType::NewTransfer(transfer_proposal) => {
+                for action in transfer_proposal.actions.iter() {
+                    self.execute_action(&action).unwrap();
+                }
+            },
+        };
+        // self.execute_action(&proposal.action).unwrap()
     }
 
     fn execute_action(&self, action: &Action<Self::Api>) -> Result<(), &'static [u8]> {

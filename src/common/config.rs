@@ -13,7 +13,7 @@ pub enum State {
 }
 
 #[type_abi]
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Clone, Debug, ManagedVecItem)]
 pub struct Action<M: ManagedTypeApi> {
     pub gas_limit: u64,
     pub dest_address: ManagedAddress<M>,
@@ -21,13 +21,6 @@ pub struct Action<M: ManagedTypeApi> {
     pub payment_amount: BigUint<M>,
     pub endpoint_name: ManagedBuffer<M>,
     pub arguments: ManagedVec<M, ManagedBuffer<M>>,
-}
-
-#[type_abi]
-#[derive(TopEncode, TopDecode)]
-pub struct ProposalCreationArgs<M: ManagedTypeApi> {
-    pub description: ManagedBuffer<M>,
-    pub action: Action<M>,
 }
 
 #[type_abi]
@@ -48,19 +41,56 @@ pub enum ProposalStatus {
 }
 
 #[type_abi]
-#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Debug, ManagedVecItem)]
+pub enum ProposalTypeEnum {
+    Nothing,
+
+    NewLaunchpad,
+    NewTransfer,
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Clone, Debug)]
+pub enum ProposalType<M: ManagedTypeApi> {
+    Nothing,
+
+    NewLaunchpad(LaunchpadProposal<M>),
+    NewTransfer(TransferProposal<M>),
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Debug)]
 pub struct Proposal<M: ManagedTypeApi> {
     pub id: u64,
+    pub proposal_data: ProposalType<M>,
+    pub proposal_type: ProposalTypeEnum,
     pub creation_timestamp: u64,
     pub proposer: ManagedAddress<M>,
     pub title: ManagedBuffer<M>,
+    pub description: ManagedBuffer<M>,
     pub status: ProposalStatus,
-
     pub was_executed: bool,
-    pub action: Action<M>,
-
     pub num_upvotes: BigUint<M>,
     pub num_downvotes: BigUint<M>,
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Clone, Debug)]
+pub struct LaunchpadProposal<M: ManagedTypeApi> {
+    pub kyc_enforced: bool,
+    pub token: TokenIdentifier<M>,
+    pub payment_token: TokenIdentifier<M>,
+    pub price: BigUint<M>,
+    pub min_buy_amount: BigUint<M>,
+    pub max_buy_amount: BigUint<M>,
+    pub start_time: u64,
+    pub end_time: u64,
+}
+
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Clone, Debug)]
+pub struct TransferProposal<M: ManagedTypeApi> {
+    pub actions: ManagedVec<M, Action<M>>,
 }
 
 #[multiversx_sc::module]
@@ -177,13 +207,13 @@ board_config::BoardConfigModule
     #[storage_mapper("voter_proposals")]
     fn voter_proposals(&self, voter: &ManagedAddress) -> UnorderedSetMapper<u64>;
 
-    // get number of proposals with the specified status
-    #[view(getProposalsCount)]
-    fn get_proposals_count(&self, status: OptionalValue<ProposalStatus>) -> u64 {
+    // get number of proposals with the specified type
+    #[view(getProposalsCountByType)]
+    fn get_proposals_count(&self, status: OptionalValue<ProposalTypeEnum>) -> u64 {
         let all = status.is_none();
-        let filter_status = match status {
+        let filter_type = match status {
             OptionalValue::Some(value) => value,
-            OptionalValue::None => ProposalStatus::Pending
+            OptionalValue::None => ProposalTypeEnum::Nothing
         };
         let mut count = 0;
         for idx in 0..self.last_proposal_id().get() {
@@ -192,8 +222,7 @@ board_config::BoardConfigModule
             }
 
             let proposal = self.proposals(idx).get();
-            let proposal_status = self.get_proposal_status(&proposal);
-            if all || proposal_status == filter_status {
+            if all || proposal.proposal_type == filter_type {
                 count += 1;
             }
         }
@@ -203,13 +232,8 @@ board_config::BoardConfigModule
 
     // view paginated proposals of certain type
     #[view(getProposals)]
-    fn get_proposals(&self, idx_from: u64, idx_to: u64, status: OptionalValue<ProposalStatus>) -> ManagedVec<Proposal<Self::Api>> {
-        let mut proposals: ManagedVec<Proposal<Self::Api>> = ManagedVec::new();
-        let all = status.is_none();
-        let filter_status = match status {
-            OptionalValue::Some(value) => value,
-            OptionalValue::None => ProposalStatus::Pending
-        };
+    fn get_proposals(&self, idx_from: u64, idx_to: u64, proposal_type: ProposalTypeEnum) -> MultiValueEncoded<Proposal<Self::Api>> {
+        let mut proposals = MultiValueEncoded::new();
         let mut real_idx: u64 = 0;
         for idx in 0..self.last_proposal_id().get() {
             if self.proposals(idx).is_empty() {
@@ -217,13 +241,12 @@ board_config::BoardConfigModule
             }
 
             let mut proposal = self.proposals(idx).get();
-            let proposal_status = self.get_proposal_status(&proposal);
-            if !all && proposal_status != filter_status {
+            if proposal.proposal_type != proposal_type {
                 continue
             }
 
             if real_idx >= idx_from && real_idx <= idx_to {
-                proposal.status = proposal_status;
+                proposal.status = self.get_proposal_status(&proposal);
                 proposals.push(proposal);
             }
             real_idx += 1;
