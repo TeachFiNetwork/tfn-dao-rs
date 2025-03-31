@@ -413,6 +413,16 @@
             "outputs": []
         },
         {
+            "name": "getContractInfo",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "ContractInfo"
+                }
+            ]
+        },
+        {
             "name": "getBoardMembers",
             "mutability": "readonly",
             "inputs": [],
@@ -700,6 +710,59 @@
                 {
                     "name": "arguments",
                     "type": "List<bytes>"
+                }
+            ]
+        },
+        "ContractInfo": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "state",
+                    "type": "State"
+                },
+                {
+                    "name": "governance_token",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "voting_tokens",
+                    "type": "List<TokenIdentifier>"
+                },
+                {
+                    "name": "voting_token_weights",
+                    "type": "List<BigUint>"
+                },
+                {
+                    "name": "voting_period",
+                    "type": "u64"
+                },
+                {
+                    "name": "quorum",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "board_quorum",
+                    "type": "u32"
+                },
+                {
+                    "name": "board_members",
+                    "type": "List<Address>"
+                },
+                {
+                    "name": "launchpad_sc",
+                    "type": "Address"
+                },
+                {
+                    "name": "last_proposal_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "proposals_count",
+                    "type": "u64"
+                },
+                {
+                    "name": "deployed_franchises",
+                    "type": "List<Address>"
                 }
             ]
         },

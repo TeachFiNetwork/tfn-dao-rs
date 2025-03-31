@@ -93,6 +93,23 @@ pub struct TransferProposal<M: ManagedTypeApi> {
     pub actions: ManagedVec<M, Action<M>>,
 }
 
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Clone, Debug)]
+pub struct ContractInfo<M: ManagedTypeApi> {
+    pub state: State,
+    pub governance_token: TokenIdentifier<M>,
+    pub voting_tokens: ManagedVec<M, TokenIdentifier<M>>,
+    pub voting_token_weights: ManagedVec<M, BigUint<M>>,
+    pub voting_period: u64,
+    pub quorum: BigUint<M>,
+    pub board_quorum: usize,
+    pub board_members: ManagedVec<M, ManagedAddress<M>>,
+    pub launchpad_sc: ManagedAddress<M>,
+    pub last_proposal_id: u64,
+    pub proposals_count: u64,
+    pub deployed_franchises: ManagedVec<M, ManagedAddress<M>>,
+}
+
 #[multiversx_sc::module]
 pub trait ConfigModule:
 board_config::BoardConfigModule
@@ -306,6 +323,45 @@ board_config::BoardConfigModule
         let mut franchises = self.franchises().get();
         franchises.push(address);
         self.franchises().set(franchises);
+    }
+
+    // contract info
+    #[view(getContractInfo)]
+    fn get_contract_info(&self) -> ContractInfo<Self::Api> {
+        let state = self.state().get();
+        let governance_token = self.governance_token().get();
+        let mut voting_tokens = ManagedVec::new();
+        let mut voting_token_weights = ManagedVec::new();
+        for (token, weight) in self.voting_tokens().iter() {
+            voting_tokens.push(token);
+            voting_token_weights.push(weight);
+        }
+        let voting_period = self.voting_period().get();
+        let quorum = self.quorum().get();
+        let board_quorum = self.board_quorum().get();
+        let mut board_members = ManagedVec::new();
+        for member in self.board_members().into_iter() {
+            board_members.push(member);
+        }
+        let launchpad_sc = self.launchpad_sc().get();
+        let last_proposal_id = self.last_proposal_id().get();
+        let proposals_count = self.get_proposals_count(OptionalValue::None);
+        let deployed_franchises = self.franchises().get();
+
+        ContractInfo {
+            state,
+            governance_token,
+            voting_tokens,
+            voting_token_weights,
+            voting_period,
+            quorum,
+            board_quorum,
+            board_members,
+            launchpad_sc,
+            last_proposal_id,
+            proposals_count,
+            deployed_franchises
+        }
     }
 
     // helpers
