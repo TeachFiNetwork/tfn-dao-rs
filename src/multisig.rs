@@ -100,6 +100,7 @@ crate::common::board_config::BoardConfigModule
         weight: BigUint,
     ) -> usize {
         require!(!self.voting_tokens().contains_key(&token), ERROR_TOKEN_ALREADY_EXISTS);
+        require!(weight > 0, ERROR_ZERO_VALUE);
 
         self.propose_action(BoardAction::AddVotingToken(token, weight))
     }
