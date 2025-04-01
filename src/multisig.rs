@@ -114,6 +114,17 @@ crate::common::board_config::BoardConfigModule
         self.propose_action(BoardAction::RemoveVotingToken(token))
     }
 
+    #[endpoint(proposeDeleteProposal)]
+    fn propose_delete_proposal(&self, proposal_id: u64) -> usize {
+        require!(!self.proposals(proposal_id).is_empty(), ERROR_PROPOSAL_NOT_FOUND);
+
+        let proposal = self.proposals(proposal_id).get();
+        require!(!proposal.was_executed, ERROR_PROPOSAL_WAS_EXECUTED);
+        require!(self.proposal_voters(proposal_id).is_empty(), ERROR_PROPOSAL_VOTERS_NOT_EMPTY);
+
+        self.propose_action(BoardAction::DeleteProposal(proposal_id))
+    }
+
     #[endpoint(proposeUpgradeFranchise)]
     fn propose_upgrade_franchise(
         &self,
@@ -193,6 +204,18 @@ crate::common::board_config::BoardConfigModule
                 self.voting_tokens().remove(&token);
                 if self.voting_tokens().is_empty() {
                     self.set_state_inactive();
+                }
+            },
+            BoardAction::DeleteProposal(proposal_id) => {
+                require!(!self.proposals(proposal_id).is_empty(), ERROR_PROPOSAL_NOT_FOUND);
+
+                let proposal = self.proposals(proposal_id).get();
+                require!(!proposal.was_executed, ERROR_PROPOSAL_WAS_EXECUTED);
+                require!(self.proposal_voters(proposal_id).is_empty(), ERROR_PROPOSAL_VOTERS_NOT_EMPTY);
+
+                self.proposals(proposal_id).clear();
+                if proposal_id == self.last_proposal_id().get() - 1 {
+                    self.last_proposal_id().set(proposal_id);
                 }
             },
             BoardAction::UpgradeFranchise(franchise_address, args) => {

@@ -677,6 +677,21 @@
             ]
         },
         {
+            "name": "proposeDeleteProposal",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "proposal_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
             "name": "proposeUpgradeFranchise",
             "mutability": "mutable",
             "inputs": [
@@ -822,8 +837,18 @@
                     ]
                 },
                 {
-                    "name": "UpgradeFranchise",
+                    "name": "DeleteProposal",
                     "discriminant": 8,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "u64"
+                        }
+                    ]
+                },
+                {
+                    "name": "UpgradeFranchise",
+                    "discriminant": 9,
                     "fields": [
                         {
                             "name": "0",

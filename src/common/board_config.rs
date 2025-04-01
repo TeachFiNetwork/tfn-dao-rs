@@ -16,6 +16,8 @@ pub enum BoardAction<M: ManagedTypeApi> {
     AddVotingToken(TokenIdentifier<M>, BigUint<M>),
     RemoveVotingToken(TokenIdentifier<M>),
 
+    DeleteProposal(u64),
+
     UpgradeFranchise(ManagedAddress<M>, ManagedArgBuffer<M>),
 }
 

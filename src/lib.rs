@@ -45,6 +45,19 @@ common::config::ConfigModule
 
         let caller = self.blockchain().get_caller();
         require!(self.board_members().contains(&caller), ERROR_ONLY_BOARD_MEMBERS);
+        require!(launchpad_proposal.start_time < launchpad_proposal.end_time, ERROR_INVALID_LAUNCHPAD_TIMES);
+        require!(
+            launchpad_proposal.start_time > self.blockchain().get_block_timestamp() + self.voting_period().get(),
+            ERROR_INVALID_LAUNCHPAD_TIMES,
+        );
+        require!(launchpad_proposal.price > 0, ERROR_ZERO_VALUE);
+        require!(launchpad_proposal.min_buy_amount <= launchpad_proposal.max_buy_amount, ERROR_WRONG_BUY_AMOUNTS);
+
+        let already_launched: bool = self.launchpad_contract_proxy()
+            .contract(self.launchpad_sc().get())
+            .is_token_launched(&launchpad_proposal.token)
+            .execute_on_dest_context();
+        require!(!already_launched, ERROR_TOKEN_ALREADY_LAUNCHED);
 
         let proposal = Proposal {
             id: self.last_proposal_id().get(),
@@ -178,6 +191,7 @@ common::config::ConfigModule
 
         let mut proposal = self.proposals(proposal_id).get();
         let pstat = self.get_proposal_status(&proposal);
+        require!(!proposal.was_executed, ERROR_PROPOSAL_WAS_EXECUTED);
         require!(pstat == ProposalStatus::Succeeded, ERROR_PROPOSAL_NOT_SUCCEEDED);
 
         self.execute_proposal(&proposal);

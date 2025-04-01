@@ -19,4 +19,7 @@ pub trait LaunchpadProxy {
         start_time: u64,
         end_time: u64
     ) -> u64;
+
+    #[view(isTokenLaunched)]
+    fn is_token_launched(&self, token: TokenIdentifier) -> bool;
 }
