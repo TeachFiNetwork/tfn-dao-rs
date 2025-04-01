@@ -21,3 +21,6 @@ pub static ERROR_NOT_BOARD_MEMBER: &[u8] = b"not board member";
 pub static ERROR_ZERO_VALUE: &[u8] = b"value cannot be zero";
 pub static ERROR_TOKEN_ALREADY_EXISTS: &[u8] = b"token already exists";
 pub static ERROR_TOKEN_NOT_FOUND: &[u8] = b"token not found";
+pub static ERROR_QUORUM_TOO_HIGH: &[u8] = b"quorum too high";
+pub static ERROR_ACTION_NOT_FOUND: &[u8] = b"action not found";
+pub static ERROR_LAST_BOARD_MEMBER: &[u8] = b"cannot remove last board member";

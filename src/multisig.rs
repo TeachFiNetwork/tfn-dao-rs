@@ -68,6 +68,7 @@ crate::common::board_config::BoardConfigModule
     #[endpoint(proposeRemoveUser)]
     fn propose_remove_user(&self, user_address: ManagedAddress) -> usize {
         require!(self.board_members().contains(&user_address), ERROR_NOT_BOARD_MEMBER);
+        require!(self.board_members().len() > 1, ERROR_LAST_BOARD_MEMBER);
 
         self.propose_action(BoardAction::RemoveBoardMember(user_address))
     }
@@ -75,6 +76,7 @@ crate::common::board_config::BoardConfigModule
     #[endpoint(proposeChangeBoardQuorum)]
     fn propose_change_board_quorum(&self, new_quorum: usize) -> usize {
         require!(new_quorum > 0, ERROR_ZERO_VALUE);
+        require!(new_quorum <= self.board_members().len(), ERROR_QUORUM_TOO_HIGH);
 
         self.propose_action(BoardAction::ChangeBoardQuorum(new_quorum))
     }
@@ -148,18 +150,30 @@ crate::common::board_config::BoardConfigModule
     }
 
     fn perform_action(&self, action_id: usize) {
+        require!(!self.action_mapper().item_is_empty_unchecked(action_id), ERROR_ACTION_NOT_FOUND);
+
         let action = self.action_mapper().get(action_id);
         self.action_mapper().clear_entry_unchecked(action_id);
         self.action_signers(action_id).clear();
         match action {
             BoardAction::Nothing=>return,
             BoardAction::AddBoardMember(board_member_address) => {
+                require!(!self.board_members().contains(&board_member_address), ERROR_ALREADY_BOARD_MEMBER);
+
                 self.board_members().insert(board_member_address);
             },
             BoardAction::RemoveBoardMember(board_member_address) => {
+                require!(self.board_members().len() > 1, ERROR_LAST_BOARD_MEMBER);
+
                 self.board_members().swap_remove(&board_member_address);
+                let new_len = self.board_members().len();
+                if self.board_quorum().get() > new_len {
+                    self.board_quorum().set(new_len);
+                }
             },
             BoardAction::ChangeBoardQuorum(new_quorum) => {
+                require!(new_quorum <= self.board_members().len(), ERROR_QUORUM_TOO_HIGH);
+
                 self.board_quorum().set(new_quorum);
             },
             BoardAction::ChangeQuorum(new_quorum) => {
