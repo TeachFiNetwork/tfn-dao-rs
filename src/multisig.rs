@@ -183,9 +183,13 @@ crate::common::board_config::BoardConfigModule
                 self.voting_period().set(new_voting_period);
             },
             BoardAction::AddVotingToken(token, weight) => {
+                require!(!self.voting_tokens().contains_key(&token), ERROR_TOKEN_ALREADY_EXISTS);
+
                 self.voting_tokens().insert(token, weight);
             },
             BoardAction::RemoveVotingToken(token) => {
+                require!(self.voting_tokens().contains_key(&token), ERROR_TOKEN_NOT_FOUND);
+
                 self.voting_tokens().remove(&token);
                 if self.voting_tokens().is_empty() {
                     self.set_state_inactive();
