@@ -152,10 +152,7 @@ crate::common::board_config::BoardConfigModule
     fn perform_action_endpoint(&self, action_id: usize) {
         let caller = self.blockchain().get_caller();
         require!(self.board_members().contains(&caller), ERROR_ONLY_BOARD_MEMBERS);
-        require!(
-            self.quorum_reached(action_id),
-            "quorum has not been reached"
-        );
+        require!(self.quorum_reached(action_id), ERROR_QUORUM_NOT_REACHED);
 
         self.perform_action(action_id)
     }

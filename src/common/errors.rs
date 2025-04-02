@@ -29,3 +29,4 @@ pub static ERROR_PROPOSAL_WAS_EXECUTED: &[u8] = b"proposal was already executed"
 pub static ERROR_PROPOSAL_VOTERS_NOT_EMPTY: &[u8] = b"proposal voters not empty";
 pub static ERROR_WRONG_BUY_AMOUNTS: &[u8] = b"wrong buy amounts";
 pub static ERROR_TOKEN_ALREADY_LAUNCHED: &[u8] = b"token already on launchpad";
+pub static ERROR_QUORUM_NOT_REACHED: &[u8] = b"quorum not reached";
