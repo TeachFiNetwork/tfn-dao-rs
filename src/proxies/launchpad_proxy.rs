@@ -24,4 +24,7 @@ pub trait LaunchpadProxy {
 
     #[view(isTokenLaunched)]
     fn is_token_launched(&self, token: TokenIdentifier) -> bool;
+
+    #[endpoint(setMainDAO)]
+    fn set_main_dao(&self);
 }

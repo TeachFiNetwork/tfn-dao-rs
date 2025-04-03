@@ -3,7 +3,8 @@ multiversx_sc::derive_imports!();
 
 use crate::common::errors::*;
 use super::board_config;
-use tfn_platform::common::config::SubscriberDetails;
+use tfn_platform::common::config::{ProxyTrait as _, SubscriberDetails};
+use crate::proxies::launchpad_proxy::{self};
 
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
@@ -182,7 +183,11 @@ board_config::BoardConfigModule
     fn set_platform_address(&self, address: ManagedAddress) {
         self.only_board_members();
 
-        self.platform_sc().set_if_empty(address);
+        self.platform_sc().set_if_empty(&address);
+        self.platform_contract_proxy()
+            .contract(address)
+            .set_main_dao()
+            .execute_on_dest_context::<()>();
     }
 
     #[view(getLaunchpadAddress)]
@@ -193,7 +198,11 @@ board_config::BoardConfigModule
     fn set_launchpad_address(&self, address: ManagedAddress) {
         self.only_board_members();
 
-        self.launchpad_sc().set_if_empty(address);
+        self.launchpad_sc().set_if_empty(&address);
+        self.launchpad_contract_proxy()
+            .contract(address)
+            .set_main_dao()
+            .execute_on_dest_context::<()>();
     }
 
     // template dao sc address
@@ -426,4 +435,11 @@ board_config::BoardConfigModule
         let caller = self.blockchain().get_caller();
         require!(self.board_members().contains(&caller), ERROR_ONLY_BOARD_MEMBERS);
     }
+
+    // proxies
+    #[proxy]
+    fn platform_contract_proxy(&self) -> tfn_platform::Proxy<Self::Api>;
+
+    #[proxy]
+    fn launchpad_contract_proxy(&self) -> launchpad_proxy::Proxy<Self::Api>;
 }

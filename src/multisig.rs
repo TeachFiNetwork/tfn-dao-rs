@@ -1,8 +1,7 @@
-use crate::common::{board_config::*, errors::*};
-
 multiversx_sc::imports!();
 
-use crate::proxies::launchpad_proxy::{self};
+use crate::common::{board_config::*, errors::*};
+use crate::proxies::launchpad_proxy::ProxyTrait as _;
 
 #[multiversx_sc::module]
 pub trait MultisigModule:
@@ -228,8 +227,4 @@ crate::common::board_config::BoardConfigModule
             },
         };
     }
-
-    // proxies
-    #[proxy]
-    fn launchpad_contract_proxy(&self) -> launchpad_proxy::Proxy<Self::Api>;
 }
