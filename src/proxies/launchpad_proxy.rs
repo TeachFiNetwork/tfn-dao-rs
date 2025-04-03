@@ -1,5 +1,7 @@
 multiversx_sc::imports!();
 
+use tfn_platform::common::config::SubscriberDetails;
+
 #[multiversx_sc::proxy]
 pub trait LaunchpadProxy {
     #[endpoint(upgradeFranchise)]
@@ -9,8 +11,8 @@ pub trait LaunchpadProxy {
     fn new_launchpad(
         &self,
         owner: ManagedAddress,
+        details: SubscriberDetails<Self::Api>,
         kyc_enforced: bool,
-        description: ManagedBuffer,
         token: TokenIdentifier,
         payment_token: TokenIdentifier,
         price: BigUint, // if payment token is USDC (6 decimals), price should be x_000_000

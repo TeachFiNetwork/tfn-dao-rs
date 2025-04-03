@@ -16,3 +16,6 @@ version = "0.54.4"
 
 [dev-dependencies.multiversx-sc-scenario]
 version = "0.54.4"
+
+[dependencies.tfn-platform]
+path = "../tfn-platform-rs"

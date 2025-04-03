@@ -32,6 +32,13 @@
     },
     "endpoints": [
         {
+            "name": "clearStorage",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
             "name": "addFunds",
             "mutability": "mutable",
             "payableInTokens": [
@@ -203,7 +210,6 @@
         },
         {
             "name": "setQuorum",
-            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
@@ -224,6 +230,27 @@
             ]
         },
         {
+            "name": "getPlatform",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "setPlatformAddress",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "getLaunchpadAddress",
             "mutability": "readonly",
             "inputs": [],
@@ -235,11 +262,60 @@
         },
         {
             "name": "setLaunchpadAddress",
-            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
                     "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getTemplateFranchiseDAO",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getTemplateEmployee",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getTemplateStudent",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "setTemplateAddresses",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "template_franchise_dao",
+                    "type": "Address"
+                },
+                {
+                    "name": "template_employee",
+                    "type": "Address"
+                },
+                {
+                    "name": "template_student",
                     "type": "Address"
                 }
             ],
@@ -398,6 +474,21 @@
             "outputs": [
                 {
                     "type": "List<Address>"
+                }
+            ]
+        },
+        {
+            "name": "isFranchise",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "bool"
                 }
             ]
         },
@@ -936,6 +1027,10 @@
             "type": "struct",
             "fields": [
                 {
+                    "name": "details",
+                    "type": "SubscriberDetails"
+                },
+                {
                     "name": "kyc_enforced",
                     "type": "bool"
                 },
@@ -1099,6 +1194,43 @@
                 {
                     "name": "Active",
                     "discriminant": 1
+                }
+            ]
+        },
+        "SubscriberDetails": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "bytes"
+                },
+                {
+                    "name": "description",
+                    "type": "bytes"
+                },
+                {
+                    "name": "logo",
+                    "type": "bytes"
+                },
+                {
+                    "name": "card",
+                    "type": "bytes"
+                },
+                {
+                    "name": "website",
+                    "type": "bytes"
+                },
+                {
+                    "name": "email",
+                    "type": "bytes"
+                },
+                {
+                    "name": "twitter",
+                    "type": "bytes"
+                },
+                {
+                    "name": "telegram",
+                    "type": "bytes"
                 }
             ]
         },

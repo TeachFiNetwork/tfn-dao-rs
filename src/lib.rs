@@ -27,6 +27,28 @@ common::config::ConfigModule
 
     #[upgrade]
     fn upgrade(&self) {
+        // self.clear_storage();
+    }
+
+    // DEBUG ENDPOINT
+    #[only_owner]
+    #[endpoint(clearStorage)]
+    fn clear_storage(&self) {
+        for proposal_id in 0..self.last_proposal_id().take() {
+            if !self.proposals(proposal_id).is_empty() {
+                for voter in self.proposal_voters(proposal_id).iter() {
+                    self.voter_proposals(&voter).swap_remove(&proposal_id);
+                }
+                self.proposal_voters(proposal_id).clear();
+                self.proposals(proposal_id).clear();
+            }
+        }
+        self.board_members().clear();
+        self.board_members().insert(self.blockchain().get_caller());
+        self.voting_tokens().clear();
+        self.voting_tokens().insert(self.governance_token().get(), BigUint::from(ONE));
+        self.franchises().clear();
+        self.set_state_inactive();
     }
 
     // dummy endpoint for adding funds to the DAO
@@ -208,8 +230,8 @@ common::config::ConfigModule
                     .contract(self.launchpad_sc().get())
                     .new_launchpad(
                         proposal.proposer.clone(),
+                        launchpad_proposal.details,
                         launchpad_proposal.kyc_enforced,
-                        proposal.description.clone(),
                         launchpad_proposal.token,
                         launchpad_proposal.payment_token,
                         launchpad_proposal.price,

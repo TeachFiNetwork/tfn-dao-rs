@@ -3,6 +3,7 @@ multiversx_sc::derive_imports!();
 
 use crate::common::errors::*;
 use super::board_config;
+use tfn_platform::common::config::SubscriberDetails;
 
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
@@ -76,6 +77,7 @@ pub struct Proposal<M: ManagedTypeApi> {
 #[type_abi]
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Clone, Debug)]
 pub struct LaunchpadProposal<M: ManagedTypeApi> {
+    pub details: SubscriberDetails<M>,
     pub kyc_enforced: bool,
     pub token: TokenIdentifier<M>,
     pub payment_token: TokenIdentifier<M>,
@@ -119,8 +121,10 @@ board_config::BoardConfigModule
         self.only_board_members();
         require!(!self.quorum().is_empty(), ERROR_QUORUM_NOT_SET);
         require!(!self.voting_period().is_empty(), ERROR_VOTING_PERIOD_NOT_SET);
-        require!(!self.launchpad_sc().is_empty(), ERROR_LAUNCHPAD_NOT_SET);
         require!(!self.voting_tokens().is_empty(), ERROR_NO_VOTING_TOKENS);
+        require!(!self.platform_sc().is_empty(), ERROR_PLATFORM_NOT_SET);
+        require!(!self.launchpad_sc().is_empty(), ERROR_LAUNCHPAD_NOT_SET);
+        require!(!self.template_franchise_dao().is_empty(), ERROR_TEMPLATE_ADDRESSES_NOT_SET);
 
         self.state().set(State::Active);
     }
@@ -158,9 +162,10 @@ board_config::BoardConfigModule
     fn voting_period(&self) -> SingleValueMapper<u64>;
 
     // quorum
-    #[only_owner]
     #[endpoint(setQuorum)]
     fn set_quorum(&self, quorum: &BigUint) {
+        self.only_board_members();
+
         self.quorum().set(quorum);
     }
 
@@ -168,16 +173,57 @@ board_config::BoardConfigModule
     #[storage_mapper("quorum")]
     fn quorum(&self) -> SingleValueMapper<BigUint>;
 
-    // launchpad sc address
+    // CONTRACTS
+    #[view(getPlatform)]
+    #[storage_mapper("platform_sc")]
+    fn platform_sc(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[endpoint(setPlatformAddress)]
+    fn set_platform_address(&self, address: ManagedAddress) {
+        self.only_board_members();
+
+        self.platform_sc().set_if_empty(address);
+    }
+
     #[view(getLaunchpadAddress)]
     #[storage_mapper("launchpad_sc")]
     fn launchpad_sc(&self) -> SingleValueMapper<ManagedAddress>;
 
-    #[only_owner]
     #[endpoint(setLaunchpadAddress)]
     fn set_launchpad_address(&self, address: ManagedAddress) {
-        self.launchpad_sc().set(address);
+        self.only_board_members();
+
+        self.launchpad_sc().set_if_empty(address);
     }
+
+    // template dao sc address
+    #[view(getTemplateFranchiseDAO)]
+    #[storage_mapper("template_franchise_dao")]
+    fn template_franchise_dao(&self) -> SingleValueMapper<ManagedAddress>;
+
+    // template employee sc address
+    #[view(getTemplateEmployee)]
+    #[storage_mapper("template_employee")]
+    fn template_employee(&self) -> SingleValueMapper<ManagedAddress>;
+
+    // template student sc address
+    #[view(getTemplateStudent)]
+    #[storage_mapper("template_student")]
+    fn template_student(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[only_owner]
+    #[endpoint(setTemplateAddresses)]
+    fn set_template_addresses(
+        &self,
+        template_franchise_dao: ManagedAddress,
+        template_employee: ManagedAddress,
+        template_student: ManagedAddress,
+    ) {
+        self.template_franchise_dao().set(template_franchise_dao);
+        self.template_employee().set(template_employee);
+        self.template_student().set(template_student);
+    }
+    // END CONTRACTS
 
     // last proposal id
     #[view(getLastProposalId)]
@@ -314,6 +360,18 @@ board_config::BoardConfigModule
     #[view(getFranchises)]
     #[storage_mapper("franchises")]
     fn franchises(&self) -> SingleValueMapper<ManagedVec<ManagedAddress>>;
+
+    #[view(isFranchise)]
+    fn is_franchise(&self, address: ManagedAddress) -> bool {
+        let franchises = self.franchises().get();
+        for franchise in franchises.into_iter() {
+            if franchise == address {
+                return true;
+            }
+        }
+
+        false
+    }
 
     #[endpoint(franchiseDeployed)]
     fn franchise_deployed(&self, address: ManagedAddress) {
