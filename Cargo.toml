@@ -19,3 +19,6 @@ version = "0.54.4"
 
 [dependencies.tfn-platform]
 path = "../tfn-platform-rs"
+
+[dependencies.tfn-digital-identity]
+path = "../tfn-digital-identity-rs"

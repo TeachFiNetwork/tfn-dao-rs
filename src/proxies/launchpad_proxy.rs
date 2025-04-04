@@ -1,5 +1,7 @@
 multiversx_sc::imports!();
 
+use tfn_digital_identity::common::config::Identity;
+
 #[multiversx_sc::proxy]
 pub trait LaunchpadProxy {
     #[endpoint(upgradeFranchise)]
@@ -9,7 +11,7 @@ pub trait LaunchpadProxy {
     fn new_launchpad(
         &self,
         owner: ManagedAddress,
-        identity_id: u64,
+        details: Identity<Self::Api>,
         kyc_enforced: bool,
         token: TokenIdentifier,
         payment_token: TokenIdentifier,

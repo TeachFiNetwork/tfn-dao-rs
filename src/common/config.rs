@@ -5,6 +5,7 @@ use crate::common::errors::*;
 use super::board_config;
 use tfn_platform::common::config::ProxyTrait as _;
 use crate::proxies::launchpad_proxy::{self};
+use tfn_digital_identity::common::config::Identity;
 
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
@@ -78,7 +79,7 @@ pub struct Proposal<M: ManagedTypeApi> {
 #[type_abi]
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Clone, Debug)]
 pub struct LaunchpadProposal<M: ManagedTypeApi> {
-    pub identity_id: u64,
+    pub details: Identity<M>,
     pub kyc_enforced: bool,
     pub token: TokenIdentifier<M>,
     pub payment_token: TokenIdentifier<M>,
@@ -210,27 +211,10 @@ board_config::BoardConfigModule
     #[storage_mapper("template_franchise_dao")]
     fn template_franchise_dao(&self) -> SingleValueMapper<ManagedAddress>;
 
-    // template employee sc address
-    #[view(getTemplateEmployee)]
-    #[storage_mapper("template_employee")]
-    fn template_employee(&self) -> SingleValueMapper<ManagedAddress>;
-
-    // template student sc address
-    #[view(getTemplateStudent)]
-    #[storage_mapper("template_student")]
-    fn template_student(&self) -> SingleValueMapper<ManagedAddress>;
-
     #[only_owner]
-    #[endpoint(setTemplateAddresses)]
-    fn set_template_addresses(
-        &self,
-        template_franchise_dao: ManagedAddress,
-        template_employee: ManagedAddress,
-        template_student: ManagedAddress,
-    ) {
+    #[endpoint(setTemplateFranchiseDAO)]
+    fn set_template_franchise_dao(&self, template_franchise_dao: ManagedAddress) {
         self.template_franchise_dao().set(template_franchise_dao);
-        self.template_employee().set(template_employee);
-        self.template_student().set(template_student);
     }
 
     #[view(getDigitalIdentityAddress)]

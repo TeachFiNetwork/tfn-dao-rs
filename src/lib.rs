@@ -1,9 +1,9 @@
 #![no_std]
 
+multiversx_sc::imports!();
+
 use common::{config::*, consts::*, errors::*};
 use crate::proxies::launchpad_proxy::ProxyTrait as _;
-
-multiversx_sc::imports!();
 
 pub mod common;
 pub mod multisig;
@@ -230,7 +230,7 @@ common::config::ConfigModule
                     .contract(self.launchpad_sc().get())
                     .new_launchpad(
                         proposal.proposer.clone(),
-                        launchpad_proposal.identity_id,
+                        launchpad_proposal.details,
                         launchpad_proposal.kyc_enforced,
                         launchpad_proposal.token,
                         launchpad_proposal.payment_token,

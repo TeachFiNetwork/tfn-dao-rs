@@ -282,40 +282,12 @@
             ]
         },
         {
-            "name": "getTemplateEmployee",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "Address"
-                }
-            ]
-        },
-        {
-            "name": "getTemplateStudent",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "Address"
-                }
-            ]
-        },
-        {
-            "name": "setTemplateAddresses",
+            "name": "setTemplateFranchiseDAO",
             "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
                     "name": "template_franchise_dao",
-                    "type": "Address"
-                },
-                {
-                    "name": "template_employee",
-                    "type": "Address"
-                },
-                {
-                    "name": "template_student",
                     "type": "Address"
                 }
             ],
@@ -1045,12 +1017,53 @@
                 }
             ]
         },
+        "Identity": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "u64"
+                },
+                {
+                    "name": "is_corporate",
+                    "type": "bool"
+                },
+                {
+                    "name": "legal_id",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "birthdate",
+                    "type": "u64"
+                },
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
+                    "name": "name",
+                    "type": "bytes"
+                },
+                {
+                    "name": "description",
+                    "type": "bytes"
+                },
+                {
+                    "name": "image",
+                    "type": "bytes"
+                },
+                {
+                    "name": "contact",
+                    "type": "List<bytes>"
+                }
+            ]
+        },
         "LaunchpadProposal": {
             "type": "struct",
             "fields": [
                 {
-                    "name": "identity_id",
-                    "type": "u64"
+                    "name": "details",
+                    "type": "Identity"
                 },
                 {
                     "name": "kyc_enforced",
