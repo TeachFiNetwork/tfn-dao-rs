@@ -230,7 +230,7 @@ common::config::ConfigModule
                     .contract(self.launchpad_sc().get())
                     .new_launchpad(
                         proposal.proposer.clone(),
-                        launchpad_proposal.details,
+                        launchpad_proposal.identity_id,
                         launchpad_proposal.kyc_enforced,
                         launchpad_proposal.token,
                         launchpad_proposal.payment_token,

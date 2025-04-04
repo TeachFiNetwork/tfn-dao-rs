@@ -322,6 +322,28 @@
             "outputs": []
         },
         {
+            "name": "getDigitalIdentityAddress",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "setDigitalIdentityAddress",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "getLastProposalId",
             "mutability": "readonly",
             "inputs": [],
@@ -1027,8 +1049,8 @@
             "type": "struct",
             "fields": [
                 {
-                    "name": "details",
-                    "type": "SubscriberDetails"
+                    "name": "identity_id",
+                    "type": "u64"
                 },
                 {
                     "name": "kyc_enforced",
@@ -1194,43 +1216,6 @@
                 {
                     "name": "Active",
                     "discriminant": 1
-                }
-            ]
-        },
-        "SubscriberDetails": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "name",
-                    "type": "bytes"
-                },
-                {
-                    "name": "description",
-                    "type": "bytes"
-                },
-                {
-                    "name": "logo",
-                    "type": "bytes"
-                },
-                {
-                    "name": "card",
-                    "type": "bytes"
-                },
-                {
-                    "name": "website",
-                    "type": "bytes"
-                },
-                {
-                    "name": "email",
-                    "type": "bytes"
-                },
-                {
-                    "name": "twitter",
-                    "type": "bytes"
-                },
-                {
-                    "name": "telegram",
-                    "type": "bytes"
                 }
             ]
         },

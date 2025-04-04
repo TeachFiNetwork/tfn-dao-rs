@@ -3,7 +3,7 @@ multiversx_sc::derive_imports!();
 
 use crate::common::errors::*;
 use super::board_config;
-use tfn_platform::common::config::{ProxyTrait as _, SubscriberDetails};
+use tfn_platform::common::config::ProxyTrait as _;
 use crate::proxies::launchpad_proxy::{self};
 
 #[type_abi]
@@ -78,7 +78,7 @@ pub struct Proposal<M: ManagedTypeApi> {
 #[type_abi]
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Clone, Debug)]
 pub struct LaunchpadProposal<M: ManagedTypeApi> {
-    pub details: SubscriberDetails<M>,
+    pub identity_id: u64,
     pub kyc_enforced: bool,
     pub token: TokenIdentifier<M>,
     pub payment_token: TokenIdentifier<M>,
@@ -231,6 +231,29 @@ board_config::BoardConfigModule
         self.template_franchise_dao().set(template_franchise_dao);
         self.template_employee().set(template_employee);
         self.template_student().set(template_student);
+    }
+
+    #[view(getDigitalIdentityAddress)]
+    #[storage_mapper("digital_identity_sc")]
+    fn digital_identity_sc(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[only_owner]
+    #[endpoint(setDigitalIdentityAddress)]
+    fn set_digital_identity_address(&self, address: ManagedAddress) {
+        require!(!self.launchpad_sc().is_empty(), ERROR_LAUNCHPAD_NOT_SET);
+        require!(!self.platform_sc().is_empty(), ERROR_PLATFORM_NOT_SET);
+
+        self.only_board_members();
+
+        self.digital_identity_sc().set_if_empty(&address);
+        self.launchpad_contract_proxy()
+            .contract(self.launchpad_sc().get())
+            .set_digital_identity(address.clone())
+            .execute_on_dest_context::<()>();
+        self.platform_contract_proxy()
+            .contract(self.platform_sc().get())
+            .set_digital_identity(address)
+            .execute_on_dest_context::<()>();
     }
     // END CONTRACTS
 
